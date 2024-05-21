@@ -16,8 +16,6 @@ public class ResponseShortEquipmentDto {
     private Long id;
     @Schema(description = "Тип оборудования")
     private ResponseEquipmentTypeDto equipmentType;
-    @Schema(description = "Полное наименование")
-    private String fullName;
     @Schema(description = "Стационарный номер")
     private Integer stationaryNumber;
     @Schema(description = "Объем")

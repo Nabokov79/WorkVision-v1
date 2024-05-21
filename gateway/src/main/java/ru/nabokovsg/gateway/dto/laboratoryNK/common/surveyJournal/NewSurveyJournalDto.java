@@ -60,7 +60,7 @@ public class NewSurveyJournalDto {
     private List<Long> laboratoryEmployeesIds;
     @Schema(description = "Индентификатор типа документа диагностики")
     @NotNull(message = "diagnostic document type id should not be null")
-    @NotEmpty(message = "diagnostic document type id should not be empty")
+    @Positive(message = "diagnostic document type id should not be positive")
     private Long diagnosticDocumentTypeId;
     @Schema(description = "необходимо приложить чертеж")
     @NotNull(message = "drawing should not be null")

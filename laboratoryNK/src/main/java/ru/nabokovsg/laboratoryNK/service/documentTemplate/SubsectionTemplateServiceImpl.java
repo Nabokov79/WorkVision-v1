@@ -33,7 +33,7 @@ public class SubsectionTemplateServiceImpl implements SubsectionTemplateService 
     private final SubsectionTemplateRepository repository;
     private final SubsectionTemplateMapper mapper;
     private final TableTemplateService tableTemplateService;
-    private final RegulatoryDocumentationTemplateService documentationTemplateService;
+    private final DocumentationTemplateService documentationTemplateService;
     private final MeasuringToolTemplateService measuringToolTemplateService;
     private final LaboratoryCertificateService laboratoryCertificateService;
     private final LaboratoryClient client;

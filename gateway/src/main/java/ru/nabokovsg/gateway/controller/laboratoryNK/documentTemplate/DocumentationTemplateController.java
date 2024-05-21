@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.nabokovsg.gateway.client.laboratoryNK.documentTemplate.DocumentationTemplateClient;
+import ru.nabokovsg.gateway.dto.laboratoryNK.documentTemplate.documentationTemplate.NewDocumentationTemplateDto;
+import ru.nabokovsg.gateway.dto.laboratoryNK.documentTemplate.documentationTemplate.UpdateDocumentationTemplateDto;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(
@@ -26,6 +30,17 @@ public class DocumentationTemplateController {
 
     private final DocumentationTemplateClient client;
 
+    @Operation(summary = "Добавить шаблоны нормативно-технической документации")
+    @PostMapping
+    public Flux<Object> save(List<NewDocumentationTemplateDto> templatesDto) {
+        return client.save(templatesDto);
+    }
+
+    @Operation(summary = "Добавить шаблоны нормативно-технической документации")
+    @PatchMapping
+    public Flux<Object> update(List<UpdateDocumentationTemplateDto> templatesDto) {
+        return client.update(templatesDto);
+    }
     @Operation(summary = "Получить шаблоны нормативно-технической документации")
     @GetMapping
     public Flux<Object> getAll() {

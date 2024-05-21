@@ -2,16 +2,15 @@ package ru.nabokovsg.laboratoryNK.service.documentTemplate;
 
 import ru.nabokovsg.laboratoryNK.dto.documentTemplate.documentationTemplate.DocumentationTemplateDto;
 import ru.nabokovsg.laboratoryNK.dto.documentTemplate.documentationTemplate.ResponseDocumentationTemplateDto;
-import ru.nabokovsg.laboratoryNK.model.common.Documentation;
 import ru.nabokovsg.laboratoryNK.model.documentTemplate.SubsectionTemplate;
 
 import java.util.List;
 
-public interface RegulatoryDocumentationTemplateService {
+public interface DocumentationTemplateService {
 
-    void save(Documentation documentation);
+    List<ResponseDocumentationTemplateDto> save(List<DocumentationTemplateDto> templatesDto);
 
-    void update(Documentation documentation);
+    ResponseDocumentationTemplateDto update(DocumentationTemplateDto templateDto);
 
     void saveWithSubsectionTemplate(SubsectionTemplate template
                                   , List<DocumentationTemplateDto> documentations);

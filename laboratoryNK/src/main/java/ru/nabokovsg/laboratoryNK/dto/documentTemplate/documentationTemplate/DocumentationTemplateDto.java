@@ -13,8 +13,10 @@ import lombok.Setter;
 @Schema(description = "Данные для добавления/изменения средства измерения")
 public class DocumentationTemplateDto {
 
+    @Schema(description = "Индентификатор")
+    private Long id;
     @Schema(description = "Порядковый номер")
     private Integer sequentialNumber;
     @Schema(description = "Индентификатор шаблона нормативно-технической документации")
-    private Long templateId;
+    private Long documentationId;
 }

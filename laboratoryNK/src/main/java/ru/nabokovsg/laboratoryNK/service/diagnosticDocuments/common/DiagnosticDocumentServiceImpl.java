@@ -16,9 +16,9 @@ import ru.nabokovsg.laboratoryNK.model.diagnosticDocuments.common.DiagnosticDocu
 import ru.nabokovsg.laboratoryNK.model.diagnosticDocuments.common.DiagnosticDocumentType;
 import ru.nabokovsg.laboratoryNK.model.diagnosticDocuments.common.DocumentStatus;
 import ru.nabokovsg.laboratoryNK.model.diagnosticDocuments.common.QDiagnosticDocument;
+import ru.nabokovsg.laboratoryNK.repository.common.SurveyJournalRepository;
 import ru.nabokovsg.laboratoryNK.repository.diagnosticDocuments.DiagnosticDocumentRepository;
 import ru.nabokovsg.laboratoryNK.service.common.StringBuilderService;
-import ru.nabokovsg.laboratoryNK.service.common.SurveyJournalService;
 import ru.nabokovsg.laboratoryNK.service.diagnosticDocuments.document.protocol.ProtocolControlService;
 import ru.nabokovsg.laboratoryNK.service.diagnosticDocuments.document.protocol.SurveyProtocolService;
 import ru.nabokovsg.laboratoryNK.service.diagnosticDocuments.document.report.ReportService;
@@ -37,12 +37,12 @@ public class DiagnosticDocumentServiceImpl extends DiagnosticDocumentStatusFacto
 
     private final DiagnosticDocumentRepository repository;
     private final DiagnosticDocumentMapper mapper;
+    private final SurveyJournalRepository journalRepository;
     private final EntityManager em;
     private final DiagnosticDocumentTypeService documentTypeService;
     private final ReportService reportService;
     private final ProtocolControlService protocolControlService;
     private final SurveyProtocolService surveyProtocolService;
-    private final SurveyJournalService surveyJournalService;
     private final StringBuilderService builderService;
 
     @Override
@@ -118,7 +118,9 @@ public class DiagnosticDocumentServiceImpl extends DiagnosticDocumentStatusFacto
         if (document == null) {
             return String.format("DiagnosticDocument for surveyJournalId=%s not found",id);
         }
-        SurveyJournal surveyJournal = surveyJournalService.getById(document.getSurveyJournalId());
+        SurveyJournal surveyJournal = journalRepository.findById(document.getSurveyJournalId())
+                .orElseThrow(() -> new NotFoundException(String.format("SurveyJournal by id=%s not found for document"
+                                                                                    , document.getSurveyJournalId())));
         switch (document.getDiagnosticDocumentType().getTypeDocument()) {
             case REPORT -> reportService.save(surveyJournal, document);
             case SURVEY_PROTOCOL -> surveyProtocolService.save(surveyJournal, document);

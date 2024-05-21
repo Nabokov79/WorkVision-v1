@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.nabokovsg.laboratoryNK.dto.documentation.DocumentationDto;
 import ru.nabokovsg.laboratoryNK.exceptions.NotFoundException;
 import ru.nabokovsg.laboratoryNK.mapper.common.DocumentationMapper;
+import ru.nabokovsg.laboratoryNK.model.common.Documentation;
 import ru.nabokovsg.laboratoryNK.model.common.QDocumentation;
 import ru.nabokovsg.laboratoryNK.repository.common.DocumentationRepository;
 
@@ -60,6 +61,17 @@ public class DocumentationServiceImpl implements DocumentationService {
                 .stream()
                 .map(mapper::mapToDocumentationDto)
                 .toList();
+    }
+
+    @Override
+    public Documentation getById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format("Documentation with id=%s not found", id)));
+    }
+
+    @Override
+    public List<Documentation> getAllByIds(List<Long> ids) {
+        return repository.findAllById(ids);
     }
 
     @Override

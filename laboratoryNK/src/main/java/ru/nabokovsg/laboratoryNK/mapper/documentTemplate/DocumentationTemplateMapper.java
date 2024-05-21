@@ -12,23 +12,23 @@ public interface DocumentationTemplateMapper {
 
     @Mapping(source = "documentation.id", target = "documentationId")
     @Mapping(source = "documentName", target = "documentName")
-    @Mapping(target = "sequentialNumber", ignore = true)
+    @Mapping(source = "sequentialNumber", target = "sequentialNumber")
     @Mapping(target = "subsectionTemplate", ignore = true)
     @Mapping(target = "id", ignore = true)
-    DocumentationTemplate mapToRegulatoryDocumentationTemplate(Documentation documentation
-                                                                       , String documentName);
+    DocumentationTemplate mapToDocumentationTemplate(Documentation documentation
+                                                     , Integer sequentialNumber
+                                                          , String documentName);
 
     @Mapping(source = "documentation.id", target = "documentationId")
     @Mapping(source = "documentName", target = "documentName")
     @Mapping(source = "template.sequentialNumber", target = "sequentialNumber")
     @Mapping(source = "template.subsectionTemplate", target = "subsectionTemplate")
     @Mapping(source = "template.id", target = "id")
-    DocumentationTemplate mapToUpdateRegulatoryDocumentationTemplate(DocumentationTemplate template
-                                                                             , Documentation documentation
-                                                                             , String documentName);
+    DocumentationTemplate mapToUpdateDocumentationTemplate(DocumentationTemplate template
+                                                         , Documentation documentation
+                                                         , String documentName);
 
-    ResponseDocumentationTemplateDto mapToResponseRegulatoryDocumentationTemplateDto(
-                                                                              DocumentationTemplate template);
+    ResponseDocumentationTemplateDto mapToResponseDocumentationTemplateDto(DocumentationTemplate template);
 
     @Mapping(source = "template.documentationId", target = "documentationId")
     @Mapping(source = "template.documentName", target = "documentName")
