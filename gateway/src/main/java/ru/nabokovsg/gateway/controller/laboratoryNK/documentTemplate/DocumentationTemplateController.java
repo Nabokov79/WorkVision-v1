@@ -3,6 +3,7 @@ package ru.nabokovsg.gateway.controller.laboratoryNK.documentTemplate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -32,14 +33,14 @@ public class DocumentationTemplateController {
 
     @Operation(summary = "Добавить шаблоны нормативно-технической документации")
     @PostMapping
-    public Flux<Object> save(List<NewDocumentationTemplateDto> templatesDto) {
+    public Flux<Object> save(@RequestBody @Valid List<NewDocumentationTemplateDto> templatesDto) {
         return client.save(templatesDto);
     }
 
-    @Operation(summary = "Добавить шаблоны нормативно-технической документации")
+    @Operation(summary = "Изменить шаблон нормативно-технической документации")
     @PatchMapping
-    public Flux<Object> update(List<UpdateDocumentationTemplateDto> templatesDto) {
-        return client.update(templatesDto);
+    public Mono<Object> update(@RequestBody @Valid UpdateDocumentationTemplateDto templateDto) {
+        return client.update(templateDto);
     }
     @Operation(summary = "Получить шаблоны нормативно-технической документации")
     @GetMapping

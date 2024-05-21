@@ -29,8 +29,8 @@ public class DocumentationTemplateClient extends BaseClient {
         return postAll(String.join(DELIMITER, API_PREFIX), templatesDto);
     }
 
-    public Flux<Object> update(List<UpdateDocumentationTemplateDto> templatesDto) {
-        return postAll(String.join(DELIMITER, API_PREFIX), templatesDto);
+    public Mono<Object> update(UpdateDocumentationTemplateDto templateDto) {
+        return patch(String.join(DELIMITER, API_PREFIX), templateDto);
     }
 
     public Flux<Object> getAll() {

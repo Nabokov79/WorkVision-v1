@@ -15,6 +15,10 @@ import lombok.Setter;
 @Schema(description = "Данные для добавления шаблона нормативно-технической документации")
 public class NewDocumentationTemplateDto {
 
+    @Schema(description = "Индентификатор типа оборудования")
+    @NotNull(message = "equipment type id should not be null")
+    @Positive(message = "equipment type id can only be positive")
+    private Long equipmentTypeId;
     @Schema(description = "Порядковый номер")
     @NotNull(message = "sequentialNumber should not be null")
     @Positive(message = "sequentialNumber can only be positive")

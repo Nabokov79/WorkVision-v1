@@ -17,6 +17,8 @@ public class DocumentationTemplate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "equipment_type_id")
+    private Long equipmentTypeId;
     @Column(name = "documentation_id")
     private Long documentationId;
     @Column(name = "sequential_number")
