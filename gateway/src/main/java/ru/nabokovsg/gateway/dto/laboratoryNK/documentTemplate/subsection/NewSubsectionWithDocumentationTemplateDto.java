@@ -27,5 +27,5 @@ public class NewSubsectionWithDocumentationTemplateDto {
     @NotBlank(message = "subsection name should not be blank")
     private String subsectionName;
     @Schema(description = "Данные нормативно-технической документации")
-    private List<@Valid TemplateDto> documentations;
+    private List<@Valid DocumentationTemplateDto> documentations;
 }

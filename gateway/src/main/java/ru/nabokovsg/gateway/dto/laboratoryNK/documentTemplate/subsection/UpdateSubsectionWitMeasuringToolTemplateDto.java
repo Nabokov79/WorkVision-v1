@@ -29,5 +29,5 @@ public class UpdateSubsectionWitMeasuringToolTemplateDto {
     @NotBlank(message = "subsection name should not be blank")
     private String subsectionName;
     @Schema(description = "Данные средств контроля и измерений")
-    private List<@Valid TemplateDto> measuringTools;
+    private List<@Valid DocumentationTemplateDto> measuringTools;
 }

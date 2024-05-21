@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 @Schema(description = "Данные для добавления/изменения средства измерения")
-public class TemplateDto {
+public class DocumentationTemplateDto {
 
     @Schema(description = "Порядковый номер")
     @NotNull(message = "sequential number should not be null")

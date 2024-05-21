@@ -8,10 +8,6 @@ import java.util.List;
 
 public interface DocumentationTemplateService {
 
-    List<ResponseDocumentationTemplateDto> save(List<DocumentationTemplateDto> templatesDto);
-
-    ResponseDocumentationTemplateDto update(DocumentationTemplateDto templateDto);
-
     void saveWithSubsectionTemplate(SubsectionTemplate template
                                   , List<DocumentationTemplateDto> documentations);
 

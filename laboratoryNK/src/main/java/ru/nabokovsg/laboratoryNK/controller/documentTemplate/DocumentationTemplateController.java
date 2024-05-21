@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.nabokovsg.laboratoryNK.dto.documentTemplate.documentationTemplate.DocumentationTemplateDto;
 import ru.nabokovsg.laboratoryNK.dto.documentTemplate.documentationTemplate.ResponseDocumentationTemplateDto;
 import ru.nabokovsg.laboratoryNK.service.documentTemplate.DocumentationTemplateService;
 
@@ -24,22 +23,6 @@ import java.util.List;
 public class DocumentationTemplateController {
 
     private final DocumentationTemplateService service;
-
-    @Operation(summary = "Добавление шаблона нормативно-технической документации")
-    @PostMapping
-    public ResponseEntity<List<ResponseDocumentationTemplateDto>> save(
-                                                          @RequestBody @Parameter(description = "Данные документации")
-                                                                        List<DocumentationTemplateDto> templatesDto) {
-        return ResponseEntity.ok().body(service.save(templatesDto));
-    }
-
-    @Operation(summary = "Изменение шаблона нормативно-технической документации")
-    @PatchMapping
-    public ResponseEntity<ResponseDocumentationTemplateDto> update(
-                                                          @RequestBody @Parameter(description = "Данные документации")
-                                                                       DocumentationTemplateDto templateDto) {
-        return ResponseEntity.ok().body(service.update(templateDto));
-    }
 
     @Operation(summary = "Получить шаблоны нормативно-технической документации")
     @GetMapping
