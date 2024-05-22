@@ -19,7 +19,7 @@ public class NewSubsectionWithDivisionDataTemplateDto {
     @Schema(description = "Порядковый номер подраздела")
     @NotNull(message = "sequential number should not be null")
     @Positive(message = "sequential number can only be positive")
-    private Integer sequentialNumber;
+    private Double sequentialNumber;
     @Schema(description = "Наименование подраздела")
     @NotBlank(message = "subsection name should not be blank")
     private String subsectionName;
