@@ -11,7 +11,9 @@ import ru.nabokovsg.laboratoryNK.model.documentTemplate.protocol.SurveyProtocolT
 import ru.nabokovsg.laboratoryNK.model.documentTemplate.report.ReportTemplate;
 import ru.nabokovsg.laboratoryNK.repository.documentTemplate.AppendicesTemplateRepository;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -49,10 +51,20 @@ public class AppendicesTemplateServiceImpl implements AppendicesTemplateService 
     }
 
     @Override
-    public void addReportTemplate(ReportTemplate reportTemplate) {
-        repository.save(
-                mapper.mapWithReportTemplate(getByEquipmentTypeId(reportTemplate.getEquipmentTypeId()), reportTemplate)
-        );
+    public Set<AppendicesTemplate> getAllByEquipmentTypeId(Long equipmentTypeId) {
+        Set<AppendicesTemplate> templates =  repository.findAllByEquipmentTypeId(equipmentTypeId);
+        if (templates.isEmpty()) {
+            throw new NotFoundException(String.format("Appendices template with equipmentType id=%s not found"
+                    , equipmentTypeId));
+        }
+        return templates;
+    }
+
+    @Override
+    public Set<AppendicesTemplate> addReportTemplate(ReportTemplate reportTemplate, Set<AppendicesTemplate> templates) {
+        return new HashSet<>(repository.saveAll(templates.stream()
+                                                         .map(a -> mapper.mapWithReportTemplate(a, reportTemplate))
+                                                         .toList()));
     }
 
     @Override

@@ -80,10 +80,12 @@ public class ProtocolReportTemplateServiceImpl implements ProtocolReportTemplate
 
     @Override
     public void addSectionTemplate(SectionTemplate template, List<Long> protocolReportTemplatesId) {
-        repository.saveAll(getAllById(protocolReportTemplatesId)
-                  .stream()
-                  .map(p -> mapper.mapWithSectionTemplate(p, template))
-                  .toList());
+        if (protocolReportTemplatesId != null && !protocolReportTemplatesId.isEmpty()) {
+            repository.saveAll(getAllById(protocolReportTemplatesId)
+                    .stream()
+                    .map(p -> mapper.mapWithSectionTemplate(p, template))
+                    .toList());
+        }
     }
 
     private ProtocolReportTemplate getById(Long id) {

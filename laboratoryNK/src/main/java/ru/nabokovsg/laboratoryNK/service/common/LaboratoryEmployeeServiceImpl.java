@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.nabokovsg.laboratoryNK.client.LaboratoryClient;
+import ru.nabokovsg.laboratoryNK.dto.client.EmployeeDto;
 import ru.nabokovsg.laboratoryNK.dto.laboratoryEmployee.employees.ResponseLaboratoryEmployeeDto;
 import ru.nabokovsg.laboratoryNK.dto.laboratoryEmployee.employees.ShortResponseLaboratoryEmployeeDto;
 import ru.nabokovsg.laboratoryNK.exceptions.NotFoundException;
@@ -11,7 +12,9 @@ import ru.nabokovsg.laboratoryNK.mapper.common.LaboratoryEmployeeMapper;
 import ru.nabokovsg.laboratoryNK.model.common.LaboratoryEmployee;
 import ru.nabokovsg.laboratoryNK.repository.common.LaboratoryEmployeeRepository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -25,20 +28,23 @@ public class LaboratoryEmployeeServiceImpl implements LaboratoryEmployeeService 
 
     @Override
     public List<ShortResponseLaboratoryEmployeeDto> copy(Long id, String divisionType) {
-        List<LaboratoryEmployee> laboratoryEmployees = client.getAllEmployees(id, divisionType)
-                                                             .stream()
-                                                             .map(e -> mapper.mapToLaboratoryEmployee(e.getId()
+        List<EmployeeDto> employeesDto = client.getAllEmployees(id, divisionType);
+        Set<Long> employeeIds = repository.findAllByEmployeeId(employeesDto.stream().map(EmployeeDto::getId).toList());
+        employeesDto = employeesDto.stream()
+                .filter(e -> !employeeIds.contains(e.getId()))
+                .toList();
+        if (!employeeIds.isEmpty()) {
+            return repository.saveAll(employeesDto
+                              .stream()
+                              .map(e -> mapper.mapToLaboratoryEmployee(e.getId()
                                                                      , e.getPost()
                                                                      , builderService.buildInitials(e)))
-                                                             .toList();
-        try {
-            laboratoryEmployees = repository.saveAll(laboratoryEmployees);
-        } catch (RuntimeException e) {
-            log.error(e.getMessage());
+                              .toList())
+                              .stream()
+                              .map(mapper::mapToShortResponseLaboratoryEmployeeDto)
+                              .toList();
         }
-        return laboratoryEmployees.stream()
-                                  .map(mapper::mapToShortResponseLaboratoryEmployeeDto)
-                                  .toList();
+        return new ArrayList<>();
     }
 
     @Override

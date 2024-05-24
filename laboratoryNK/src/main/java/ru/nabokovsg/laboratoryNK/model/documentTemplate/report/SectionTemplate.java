@@ -20,6 +20,10 @@ public class SectionTemplate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "document_type_id")
+    private Long documentTypeId;
+    @Column(name = "equipment_type_id")
+    private Long equipmentTypeId;
     @Column(name = "sequential_number")
     private Integer sequentialNumber;
     @Column(name = "section_name")

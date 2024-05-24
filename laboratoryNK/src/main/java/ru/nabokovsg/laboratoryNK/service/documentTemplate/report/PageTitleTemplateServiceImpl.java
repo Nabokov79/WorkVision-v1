@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.nabokovsg.laboratoryNK.dto.documentTemplate.report.pageTitle.PageTitleTemplateDto;
 import ru.nabokovsg.laboratoryNK.dto.documentTemplate.report.pageTitle.ResponsePageTitleTemplateDto;
+import ru.nabokovsg.laboratoryNK.exceptions.BadRequestException;
 import ru.nabokovsg.laboratoryNK.exceptions.NotFoundException;
 import ru.nabokovsg.laboratoryNK.mapper.documentTemplate.report.PageTitleTemplateMapper;
 import ru.nabokovsg.laboratoryNK.model.documentTemplate.report.PageTitleTemplate;
@@ -18,18 +19,20 @@ public class PageTitleTemplateServiceImpl implements PageTitleTemplateService {
     private final PageTitleTemplateRepository repository;
     private final PageTitleTemplateMapper mapper;
     private final DocumentHeaderTemplateService documentHeaderService;
-    private final ReportTemplateService reportService;
     private final DiagnosticDocumentTypeService documentTypeService;
 
     @Override
     public ResponsePageTitleTemplateDto save(PageTitleTemplateDto pageTitleDto) {
-        reportService.validateByIds(pageTitleDto.getDocumentTypeId(), pageTitleDto.getEquipmentTypeId());
-        PageTitleTemplate template =
-                repository.save(mapper.mapToPageTitleTemplate(pageTitleDto
-                        , documentTypeService.getById(pageTitleDto.getDocumentTypeId())
-                        , documentHeaderService.getAllByDocumentTypeId(pageTitleDto.getDocumentTypeId())));
-        reportService.save(pageTitleDto.getDocumentTypeId(), pageTitleDto.getEquipmentTypeId(), template);
-        return mapper.mapToResponsePageTitleTemplateDto(template);
+        if (repository.existsByDocumentTypeIdAndEquipmentTypeId(pageTitleDto.getDocumentTypeId()
+                                                              , pageTitleDto.getEquipmentTypeId())) {
+            throw new BadRequestException(
+                    String.format("PageTitle template by documentTypeId=%s and equipmentTypeIdId=%s not found"
+                                                                                , pageTitleDto.getDocumentTypeId()
+                                                                                , pageTitleDto.getEquipmentTypeId()));
+        }
+        return mapper.mapToResponsePageTitleTemplateDto(repository.save(mapper.mapToPageTitleTemplate(pageTitleDto
+                , documentTypeService.getById(pageTitleDto.getDocumentTypeId())
+                , documentHeaderService.getAllByDocumentTypeId(pageTitleDto.getDocumentTypeId()))));
     }
 
     @Override
@@ -50,6 +53,15 @@ public class PageTitleTemplateServiceImpl implements PageTitleTemplateService {
         return mapper.mapToResponsePageTitleTemplateDto(
                 repository.findById(id).orElseThrow(
                         () -> new NotFoundException(String.format("PageTitle template with id=%s not found", id))));
+    }
+
+    @Override
+    public PageTitleTemplate getByIds(Long documentTypeId, Long equipmentTypeId) {
+        return repository.findByDocumentTypeIdAndEquipmentTypeId(documentTypeId, equipmentTypeId)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("PageTitle template by documentTypeId=%s and equipmentTypeId=%s not found"
+                                                                                            , documentTypeId
+                                                                                            , equipmentTypeId)));
     }
 
     @Override

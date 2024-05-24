@@ -16,4 +16,6 @@ public interface ReportTemplateRepository extends JpaRepository<ReportTemplate, 
     boolean existsByDocumentTypeIdAndEquipmentTypeId(Long documentTypeId, Long equipmentTypeId);
 
     Optional<ReportTemplate> findByDocumentTypeIdAndEquipmentTypeId(Long documentTypeId, Long equipmentTypeId);
+
+    Optional<ReportTemplate> findByDocumentTypeId(Long documentTypeId);
 }

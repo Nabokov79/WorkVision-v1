@@ -17,6 +17,7 @@ public interface AppendicesTemplateMapper {
     ResponseAppendicesTemplateDto mapToResponseAppendicesDto(AppendicesTemplate appendices);
 
     @Mapping(source = "reportTemplate", target = "reportTemplate")
+    @Mapping(target = "id", ignore = true)
     AppendicesTemplate mapWithReportTemplate(@MappingTarget AppendicesTemplate appendices
                                                           , ReportTemplate reportTemplate);
 

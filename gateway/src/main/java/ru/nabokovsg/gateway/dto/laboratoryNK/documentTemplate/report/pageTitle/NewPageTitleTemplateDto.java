@@ -21,6 +21,8 @@ public class NewPageTitleTemplateDto {
     @Positive(message = "document type id can only be positive")
     private Long documentTypeId;
     @Schema(description = "Индентификатор типа оборудования")
+    @NotNull(message = " equipmentType id should not be null")
+    @Positive(message = "equipmentTypee id can only be positive")
     private Long equipmentTypeId;
     @Schema(description = "Строка наименования оборудования")
     @NotBlank(message = "equipment text should not be blank")

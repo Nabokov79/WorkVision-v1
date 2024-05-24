@@ -76,6 +76,14 @@ public class BaseClient {
                         response -> response.bodyToMono(String.class).map(NotFoundException::new))
                 .bodyToMono(Object.class);
     }
+    public Mono<Object> get(String path, MultiValueMap<String, String> params) {
+        return client.get()
+                .uri(uriBuilder -> uriBuilder.path(path)
+                        .queryParams(params)
+                        .build())
+                .retrieve()
+                .bodyToMono(Object.class);
+    }
 
     public Flux<Object> getAll(String path) {
         return client.get()

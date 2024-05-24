@@ -21,11 +21,19 @@ public class UpdateSectionWithProtocolTemplateDto {
     @NotNull(message = "section template id should not be null")
     @Positive(message = "section template id can only be positive")
     private Long id;
+    @Schema(description = "Индентификатор типа документа")
+    @NotNull(message = "documentType id should not be null")
+    @Positive(message = "documentType id can only be positive")
+    private Long documentTypeId;
+    @Schema(description = "Индентификатор типа оборудования")
+    @NotNull(message = " equipmentType id should not be null")
+    @Positive(message = "equipmentType id can only be positive")
+    private Long equipmentTypeId;
     @Schema(description = "Порядковый номер")
     @NotNull(message = "sequential number should not be null")
     @Positive(message = "sequential number can only be positive")
     private Integer sequentialNumber;
-    @Schema(description = "Название")
+    @Schema(description = "Наименование раздела")
     @NotBlank(message = "section name should not be blank")
     private String sectionName;
     @Schema(description = "Индентификаторы протоколов отчета")

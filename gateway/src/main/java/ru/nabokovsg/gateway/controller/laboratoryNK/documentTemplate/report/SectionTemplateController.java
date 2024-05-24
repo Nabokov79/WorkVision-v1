@@ -64,8 +64,8 @@ public class SectionTemplateController {
 
     @Operation(summary = "Изменение данных разделов")
     @PatchMapping("/protocol")
-    public Mono<Object> updateWithProtocol( @RequestBody @Valid @Parameter(description = "Данные шаблона разделф")
-                                            UpdateSectionWithProtocolTemplateDto sectionDto) {
+    public Mono<Object> updateWithProtocol(@RequestBody @Valid @Parameter(description = "Данные шаблона разделф")
+                                                               UpdateSectionWithProtocolTemplateDto sectionDto) {
         return client.updateWithProtocol(sectionDto);
     }
 

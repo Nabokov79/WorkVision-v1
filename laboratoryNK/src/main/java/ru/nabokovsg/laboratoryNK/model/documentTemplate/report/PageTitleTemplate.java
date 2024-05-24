@@ -17,6 +17,10 @@ public class PageTitleTemplate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "document_type_id")
+    private Long documentTypeId;
+    @Column(name = "equipment_type_id")
+    private Long equipmentTypeId;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "page_title_templates_document_headers",

@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.nabokovsg.gateway.dto.laboratoryNK.documentTemplate.measuringToolTemplate.MeasuringToolTemplateDto;
 
 import java.util.List;
 
@@ -27,5 +28,5 @@ public class NewSubsectionWitMeasuringToolTemplateDto {
     @NotBlank(message = "subsection name should not be blank")
     private String subsectionName;
     @Schema(description = "Данные средств контроля и измерений")
-    private List<@Valid DocumentationTemplateDto> measuringTools;
+    private List<@Valid MeasuringToolTemplateDto> measuringTools;
 }

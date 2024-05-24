@@ -113,7 +113,9 @@ public class StringBuilderServiceImpl extends ConstantMonth implements StringBui
                 "№",
                 certificate.getLicenseNumber(),
                 "от",
-                certificate.getStartDate().toString());
+                String.join(".", String.valueOf(certificate.getStartDate().getDayOfMonth())
+                                        , getValue(certificate.getStartDate())
+                                        , String.valueOf(certificate.getStartDate().getYear())));
     }
 
     @Override

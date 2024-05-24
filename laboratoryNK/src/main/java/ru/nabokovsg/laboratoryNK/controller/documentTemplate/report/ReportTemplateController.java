@@ -7,10 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.nabokovsg.laboratoryNK.dto.documentTemplate.report.ResponseReportTemplateDto;
 import ru.nabokovsg.laboratoryNK.dto.documentTemplate.report.ShortResponseReportTemplateDto;
 import ru.nabokovsg.laboratoryNK.service.documentTemplate.report.ReportTemplateService;
@@ -29,6 +26,15 @@ import java.util.List;
 public class ReportTemplateController {
 
     private final ReportTemplateService service;
+
+    @Operation(summary = "Создать шаблон отчета")
+    @GetMapping("/create")
+    public ResponseEntity<ResponseReportTemplateDto> create(@RequestParam(name = "documentTypeId")
+                                    @Parameter(description = "Индентификатор типа документа")  Long documentTypeId
+                                  , @RequestParam(name = "equipmentTypeId")
+                                    @Parameter(description = "Индентификатор типа оборудования") Long equipmentTypeId) {
+        return ResponseEntity.ok().body(service.create(documentTypeId, equipmentTypeId));
+    }
 
     @Operation(summary = "Получить шаблон отчета")
     @GetMapping("/{id}")

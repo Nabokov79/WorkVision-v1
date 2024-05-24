@@ -103,34 +103,42 @@ public class SubsectionTemplateServiceImpl implements SubsectionTemplateService 
 
     @Override
     public void addProtocolReportTemplate(ProtocolReportTemplate template, List<Long> subsectionTemplatesId) {
-        repository.saveAll(getAllByIds(subsectionTemplatesId)
-                  .stream()
-                  .map(s -> mapper.mapWithProtocolReportTemplate(s, template))
-                  .toList());
+        if (subsectionTemplatesId != null && !subsectionTemplatesId.isEmpty()) {
+            repository.saveAll(getAllByIds(subsectionTemplatesId)
+                    .stream()
+                    .map(s -> mapper.mapWithProtocolReportTemplate(s, template))
+                    .toList());
+        }
     }
 
     @Override
     public void addSectionTemplate(SectionTemplate template, List<Long> subsectionTemplatesId) {
-        repository.saveAll(getAllByIds(subsectionTemplatesId)
-                .stream()
-                .map(s -> mapper.mapWithSectionTemplate(s, template))
-                .toList());
+        if (subsectionTemplatesId != null && !subsectionTemplatesId.isEmpty()) {
+            repository.saveAll(getAllByIds(subsectionTemplatesId)
+                    .stream()
+                    .map(s -> mapper.mapWithSectionTemplate(s, template))
+                    .toList());
+        }
     }
 
     @Override
     public void addProtocolTemplate(SurveyProtocolTemplate template, List<Long> subsectionTemplatesId) {
-        repository.saveAll(getAllByIds(subsectionTemplatesId)
-                .stream()
-                .map(s -> mapper.mapWithProtocolTemplate(s, template))
-                .toList());
+        if (subsectionTemplatesId != null && !subsectionTemplatesId.isEmpty()) {
+            repository.saveAll(getAllByIds(subsectionTemplatesId)
+                    .stream()
+                    .map(s -> mapper.mapWithProtocolTemplate(s, template))
+                    .toList());
+        }
     }
 
     @Override
     public void addProtocolControlTemplate(ProtocolControlTemplate template, List<Long> subsectionTemplatesId) {
-        repository.saveAll(getAllByIds(subsectionTemplatesId)
-                .stream()
-                .map(s -> mapper.mapWithProtocolControlTemplate(s, template))
-                .toList());
+        if (subsectionTemplatesId != null && !subsectionTemplatesId.isEmpty()) {
+            repository.saveAll(getAllByIds(subsectionTemplatesId)
+                    .stream()
+                    .map(s -> mapper.mapWithProtocolControlTemplate(s, template))
+                    .toList());
+        }
     }
 
     private Set<SubsectionTemplate> getAllByIds(List<Long> ids) {

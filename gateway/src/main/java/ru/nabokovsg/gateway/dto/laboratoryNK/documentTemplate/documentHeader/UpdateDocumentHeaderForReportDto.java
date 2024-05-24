@@ -32,4 +32,13 @@ public class UpdateDocumentHeaderForReportDto {
     @Schema(description = "Указать лицензию/аттестацию")
     @NotNull(message = "specifyLicense should not be null")
     private Boolean specifyLicense;
+    @Schema(description = "Указать в документе полное наименование")
+    @NotNull(message = "specifyFullName should not be null")
+    private Boolean specifyFullName;
+    @Schema(description = "Указать адрес")
+    @NotNull(message = "specifyAddress should not be null")
+    private Boolean specifyAddress;
+    @Schema(description = "Указать контактные данные организации")
+    @NotNull(message = "specifyContacts should not be null")
+    private Boolean specifyContacts;
 }

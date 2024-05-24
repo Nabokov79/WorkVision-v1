@@ -38,4 +38,22 @@ public class ConstantMonth {
                                             String.format("Unknown month number=%s", date.getMonth().getValue()));
         }
     }
+
+    public String getValue(LocalDate date) {
+        switch (date.getMonth()) {
+            case JANUARY -> {return "01";}
+            case FEBRUARY -> {return "02";}
+            case MARCH -> {return "03";}
+            case APRIL -> {return "04";}
+            case MAY -> {return "05";}
+            case JUNE -> {return "06";}
+            case JULY -> {return "07";}
+            case AUGUST -> {return "08";}
+            case SEPTEMBER -> {return "09";}
+            case OCTOBER -> {return "10";}
+            case NOVEMBER -> {return "11";}
+            case DECEMBER -> {return "12";}
+            default -> throw new BadRequestException(String.format("Unknown month month=%s", date.getMonth()));
+        }
+    }
 }

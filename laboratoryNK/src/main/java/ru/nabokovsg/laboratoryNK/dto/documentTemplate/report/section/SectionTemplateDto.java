@@ -15,6 +15,10 @@ public class SectionTemplateDto {
 
     @Schema(description = "Индентификатор")
     private Long id;
+    @Schema(description = "Индентификатор типа документа")
+    private Long documentTypeId;
+    @Schema(description = "Индентификатор типа оборудования")
+    private Long equipmentTypeId;
     @Schema(description = "Порядковый номер")
     private Integer sequentialNumber;
     @Schema(description = "Название")

@@ -8,10 +8,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.nabokovsg.gateway.client.laboratoryNK.documentTemplate.report.ReportTemplateClient;
@@ -29,9 +26,18 @@ public class ReportTemplateController {
 
     private final ReportTemplateClient client;
 
+    @Operation(summary = "Создать шаблон отчета")
+    @GetMapping("/create")
+    public Mono<Object> create(@RequestParam(name = "documentTypeId") @NotNull @Positive
+                               @Parameter(description = "Индентификатор типа документа") Long documentTypeId
+                             , @RequestParam(name = "equipmentTypeId") @NotNull @Positive
+                               @Parameter(description = "Индентификатор типа оборудования") Long equipmentTypeId) {
+        return client.create(documentTypeId, equipmentTypeId);
+    }
     @Operation(summary = "Получить шаблон отчета")
     @GetMapping("/{id}")
-    public Mono<Object> get(@PathVariable @NotNull @Positive @Parameter(name = "Индентификатор") Long id) {
+    public Mono<Object> get(@PathVariable @NotNull @Positive
+                                          @Parameter(name = "Индентификатор") Long id) {
         return client.get(id);
     }
 
