@@ -17,4 +17,17 @@ public interface CellTableMapper {
                            , Integer stringSequentialNumber
                            , String cellValue
                            , DocumentTable table);
+
+    @Mapping(source = "mergeLines", target = "mergeLines")
+    @Mapping(source = "columnSequentialNumber", target = "columnSequentialNumber")
+    @Mapping(source = "stringSequentialNumber", target = "stringSequentialNumber")
+    @Mapping(source = "cellValue", target = "cellValue")
+    @Mapping(source = "table", target = "table")
+    @Mapping(target = "id", ignore = true)
+    CellTable mapToElementCell(
+              Integer mergeLines
+            , Integer columnSequentialNumber
+            , Integer stringSequentialNumber
+            , String cellValue
+            , DocumentTable table);
 }

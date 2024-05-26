@@ -72,7 +72,7 @@ public class CalculationParameterMeasurementServiceImpl extends ConstParameterMe
         Double firstValue = parameterMeasurementsDto.get(getQuantity()).getValue();
         CalculationParameterMeasurement quantity = parameterMeasurements.get(parameterMeasurementsDto.get(getQuantity()).getParameterId());
         if (quantity == null) {
-            quantity = new CalculationParameterMeasurement(null, getQuantity(), null, null, getPieces(), null, null);
+            quantity = new CalculationParameterMeasurement(null, null, null, getQuantity(), null, null, getPieces(), null, null);
         }
         if (quantity.getFirstValue() == null && firstValue == null) {
             quantity.setFirstValue(1.0);
@@ -93,36 +93,44 @@ public class CalculationParameterMeasurementServiceImpl extends ConstParameterMe
                                                     , Map<String, ParameterMeasurementDto> parameterMeasurementsDto) {
         CalculationParameterMeasurement parameterMeasurement
                                 = parameterMeasurements.get(parameterMeasurementsDto.get(getSquare()).getParameterId());
-        Double square = parameterMeasurementsDto.get(getSquare()).getValue();
-        if (square == null) {
-            if (parameterMeasurementsDto.get(getLength()) != null) {
-                if (parameterMeasurementsDto.get(getWidth()) != null) {
-                    square = parameterMeasurementsDto.get(getLength()).getValue()
-                           * parameterMeasurementsDto.get(getWidth()).getValue();
-                }
-                if (parameterMeasurementsDto.get(getHeight()) != null
-                                                                 && parameterMeasurementsDto.get(getWidth()) == null) {
-                    square = parameterMeasurementsDto.get(getLength()).getValue()
-                           * parameterMeasurementsDto.get(getHeight()).getValue();
-                }
-            }
-            if (parameterMeasurementsDto.get(getDiameter()) != null) {
-                double rad = parameterMeasurementsDto.get(getDiameter()).getValue() / 2;
-                if (parameterMeasurementsDto.get(getHeight()) != null) {
-                    square = 2 * Math.PI * rad * parameterMeasurementsDto.get(getHeight()).getValue() * 100 / 100;
-                } else {
-                    square = Math.PI * rad * rad * 100 / 100;
-                }
-            }
-            if (square != null && parameterMeasurement.getUnitMeasurement().equals(getM2())) {
-                square /= 1000000;
-            }
-            parameterMeasurement.setFirstValue(square);
-            parameterMeasurements.put(parameterMeasurement.getId(), parameterMeasurement);
-            if (Objects.equals(square, parameterMeasurement.getFirstValue())) {
-                return countQuantity(parameterMeasurements, parameterMeasurementsDto);
-            }
+        double square = countSquareByLengthAndWidth(parameterMeasurementsDto);
+        if (parameterMeasurementsDto.get(getDiameter()) != null && square == 0) {
+            square = countSquareByDiameter(parameterMeasurementsDto.get(getDiameter()).getValue());
+        }
+        if (square == 0) {
+            square = countSquareByLengthAndHeight(parameterMeasurementsDto);
+        }
+        if (parameterMeasurement.getUnitMeasurement().equals(getM2())) {
+            square /= 1000000;
+        }
+        parameterMeasurement.setFirstValue(square);
+        parameterMeasurements.put(parameterMeasurement.getId(), parameterMeasurement);
+        if (Objects.equals(square, parameterMeasurement.getFirstValue())) {
+            return countQuantity(parameterMeasurements, parameterMeasurementsDto);
         }
         return new HashSet<>(parameterMeasurements.values());
+    }
+
+    private double countSquareByLengthAndWidth(Map<String, ParameterMeasurementDto> parameterMeasurementsDto) {
+        Double length = parameterMeasurementsDto.get(getLength()).getValue();
+        Double width = parameterMeasurementsDto.get(getWidth()).getValue();
+        if (length != null && width != null) {
+            return length * width;
+        }
+        return 0;
+    }
+
+    private double countSquareByLengthAndHeight(Map<String, ParameterMeasurementDto> parameterMeasurementsDto) {
+        Double length = parameterMeasurementsDto.get(getLength()).getValue();
+        Double height = parameterMeasurementsDto.get(getHeight()).getValue();
+        if (length != null && height != null) {
+            return length * height;
+        }
+        return 0;
+    }
+
+    private double countSquareByDiameter(double diameter) {
+        double rad = diameter / 2;
+        return Math.PI * rad * rad * 100 / 100;
     }
  }

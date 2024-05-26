@@ -17,6 +17,8 @@ public class CellTable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "merge_lines")
+    private Integer mergeLines;
     @Column(name = "column_number")
     private Integer columnSequentialNumber;
     @Column(name = "string_number")

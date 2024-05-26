@@ -48,7 +48,8 @@ public class CompletedRepairElementServiceImpl implements CompletedRepairElement
             }
             repair = repository.save(repair);
         }
-        repair.setParameterMeasurements(parameterMeasurementService.save(elementRepair.getTypeCalculation()
+        repair.getParameterMeasurements().addAll(parameterMeasurementService.saveForCompletedRepair( repair
+                                                                       , elementRepair.getTypeCalculation()
                                                                        , elementRepair.getMeasuredParameters()
                                                                        , repair.getParameterMeasurements()
                                                                        , repairDto.getParameterMeasurements()));

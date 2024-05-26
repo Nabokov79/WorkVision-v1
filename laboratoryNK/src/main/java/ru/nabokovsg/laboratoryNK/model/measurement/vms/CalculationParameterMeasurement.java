@@ -11,12 +11,16 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "result_measurement_parameters")
+@Table(name = "calculation_parameters")
 public class CalculationParameterMeasurement {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "number")
+    private Integer number;
+    @Column(name = "sequential_number")
+    private Integer sequentialNumber;
     @Column(name = "parameter_name")
     private String parameterName;
     @Column(name = "first_value")

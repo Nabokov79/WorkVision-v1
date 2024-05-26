@@ -38,24 +38,24 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
 
     @Override
     public ResponseDefectMeasurementDto save(DefectMeasurementDto measurementDto) {
-        DefectMeasurement defectMeasurement = getByPredicate(measurementDto);
+        DefectMeasurement measurement = getByPredicate(measurementDto);
         Defect defect = defectsService.getById(measurementDto.getDefectId());
-        if (defectMeasurement == null) {
+        if (measurement == null) {
             EquipmentElement element = equipmentElementService.getById(measurementDto.getElementId());
-            DefectMeasurement measurement = mapper.mapWithEquipmentElement(measurementDto, defect, element);
+            measurement = mapper.mapWithEquipmentElement(measurementDto, defect, element);
             if(measurementDto.getPartElementId() != null) {
                 Map<Long, PartElement> partsElement = element.getPartsElement()
                         .stream().collect(Collectors.toMap(PartElement::getId, p -> p));
                 measurement = mapper.mapWithPartElement(measurement, partsElement.get(measurementDto.getPartElementId()));
             }
-            defectMeasurement = repository.save(measurement);
-            defectMeasurement.getParameterMeasurements().addAll(parameterMeasurementService.save(
-                    defect.getTypeCalculation()
-                    , defect.getMeasuredParameters()
-                    , defectMeasurement.getParameterMeasurements()
-                    , measurementDto.getParameterMeasurements()));
+            measurement = repository.save(measurement);
         }
-        return mapper.mapToResponseDefectMeasurementDto(defectMeasurement);
+        measurement.getParameterMeasurements().addAll(parameterMeasurementService.saveForDefect(measurement
+                                                                        , defect.getTypeCalculation()
+                                                                        , defect.getMeasuredParameters()
+                                                                        , measurement.getParameterMeasurements()
+                                                                        , measurementDto.getParameterMeasurements()));
+        return mapper.mapToResponseDefectMeasurementDto(measurement);
     }
 
     @Override

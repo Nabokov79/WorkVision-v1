@@ -6,6 +6,9 @@ public enum TypeCalculation {
 
     QUANTITY,
     SQUARE,
+    MAX,
+    MIN,
+    MAX_MIN,
     NO_ACTION;
 
     public static Optional<TypeCalculation> from(String calculation) {
