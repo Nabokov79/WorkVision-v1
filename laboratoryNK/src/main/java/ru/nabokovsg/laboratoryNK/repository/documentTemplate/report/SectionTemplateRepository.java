@@ -11,9 +11,5 @@ public interface SectionTemplateRepository extends JpaRepository<SectionTemplate
     @Query("select t.sectionsTemplate from ReportTemplate t where t.id=?1")
     Set<SectionTemplate> findByReportTemplateId(Long id);
 
-    boolean existsByDocumentTypeIdAndEquipmentTypeIdAndSectionName(Long documentTypeId
-                                                                 , Long equipmentTypeId
-                                                                 , String sectionName);
-
-    Set<SectionTemplate> findAllByDocumentTypeIdAndEquipmentTypeId(Long documentTypeId, Long equipmentTypeId);
+    boolean existsByReportTemplateIdAndSectionName(Long reportTemplateId, String sectionName);
 }

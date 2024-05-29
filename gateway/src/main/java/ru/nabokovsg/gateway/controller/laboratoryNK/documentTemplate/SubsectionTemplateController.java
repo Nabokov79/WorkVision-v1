@@ -58,20 +58,20 @@ public class SubsectionTemplateController {
     @Operation(summary = "Добавление нового шаблона подраздела раздела с данными нормативно-технической документации")
     @PostMapping("/documentation")
     public Mono<Object> saveWithDocumentation(@RequestBody @Valid @Parameter(description = "Шаблон подраздела")
-                                              NewSubsectionWithDocumentationTemplateDto subsectionsDto) {
+                                                    NewSubsectionWithDocumentationTemplateDto subsectionsDto) {
         return client.saveWithDocumentation(subsectionsDto);
     }
 
     @Operation(summary = "Изменение данных шаблона подраздела с данными нормативно-технической документации")
     @PatchMapping("/documentation")
-    public Mono<Object> updateWithDocumentation(@RequestBody @Valid@Parameter(description = "Шаблон подраздела")
+    public Mono<Object> updateWithDocumentation(@RequestBody @Valid @Parameter(description = "Шаблон подраздела")
                                                 UpdateSubsectionWithDocumentationTemplateDto subsectionsDto) {
         return client.updateWithDocumentation(subsectionsDto);
     }
 
     @Operation(summary = "Добавление нового шаблона подраздела раздела с таблицей")
     @PostMapping("/table")
-    public Mono<Object> saveWithTable(@RequestBody @Valid@Parameter(description = "Шаблон подраздела")
+    public Mono<Object> saveWithTable(@RequestBody @Valid @Parameter(description = "Шаблон подраздела")
                                                                     NewSubsectionWithTableTemplateDto subsectionsDto) {
         return client.saveWithTable(subsectionsDto);
     }

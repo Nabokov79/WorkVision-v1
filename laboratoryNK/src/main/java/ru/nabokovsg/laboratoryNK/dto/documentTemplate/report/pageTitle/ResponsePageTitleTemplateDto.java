@@ -26,10 +26,6 @@ public class ResponsePageTitleTemplateDto {
     private String equipmentText;
     @Schema(description = "Строка местоположения")
     private String installationLocation;
-    @Schema(description = "Строка адреса")
-    private String address;
-    @Schema(description = "Строка подписи")
-    private String signature;
     @Schema(description = "Населенный пункт")
     private String city;
 }

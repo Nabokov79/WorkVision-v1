@@ -27,15 +27,6 @@ public class ReportTemplateController {
 
     private final ReportTemplateService service;
 
-    @Operation(summary = "Создать шаблон отчета")
-    @GetMapping("/create")
-    public ResponseEntity<ResponseReportTemplateDto> create(@RequestParam(name = "documentTypeId")
-                                    @Parameter(description = "Индентификатор типа документа")  Long documentTypeId
-                                  , @RequestParam(name = "equipmentTypeId")
-                                    @Parameter(description = "Индентификатор типа оборудования") Long equipmentTypeId) {
-        return ResponseEntity.ok().body(service.create(documentTypeId, equipmentTypeId));
-    }
-
     @Operation(summary = "Получить шаблон отчета")
     @GetMapping("/{id}")
     public ResponseEntity<ResponseReportTemplateDto> get(@PathVariable @Parameter(name = "Индентификатор") Long id) {

@@ -52,7 +52,7 @@ public class AppendicesTemplateServiceImpl implements AppendicesTemplateService 
 
     @Override
     public Set<AppendicesTemplate> getAllByEquipmentTypeId(Long equipmentTypeId) {
-        Set<AppendicesTemplate> templates =  repository.findAllByEquipmentTypeId(equipmentTypeId);
+        Set<AppendicesTemplate> templates = repository.findAllByEquipmentTypeId(equipmentTypeId);
         if (templates.isEmpty()) {
             throw new NotFoundException(String.format("Appendices template with equipmentType id=%s not found"
                     , equipmentTypeId));

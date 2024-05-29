@@ -33,7 +33,7 @@ public class LaboratoryEmployeeServiceImpl implements LaboratoryEmployeeService 
         employeesDto = employeesDto.stream()
                 .filter(e -> !employeeIds.contains(e.getId()))
                 .toList();
-        if (!employeeIds.isEmpty()) {
+        if (!employeesDto.isEmpty()) {
             return repository.saveAll(employeesDto
                               .stream()
                               .map(e -> mapper.mapToLaboratoryEmployee(e.getId()

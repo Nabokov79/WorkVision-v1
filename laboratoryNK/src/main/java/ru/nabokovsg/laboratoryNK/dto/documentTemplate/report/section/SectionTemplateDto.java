@@ -15,20 +15,14 @@ public class SectionTemplateDto {
 
     @Schema(description = "Индентификатор")
     private Long id;
-    @Schema(description = "Индентификатор типа документа")
-    private Long documentTypeId;
-    @Schema(description = "Индентификатор типа оборудования")
-    private Long equipmentTypeId;
+    @Schema(description = "Индентификатор шаблона отчета")
+    private Long reportTemplateId;
     @Schema(description = "Порядковый номер")
     private Integer sequentialNumber;
     @Schema(description = "Название")
     private String sectionName;
     @Schema(description = "Указать в разделе данные паспорта оборудования")
     private Boolean specifyEquipmentPassport;
-    @Schema(description = "Раздел содержит подразделы")
-    private Boolean subsection;
-    @Schema(description = "Раздел содержит протоколы")
-    private Boolean protocol;
     @Schema(description = "Индентификаторы подразделов")
     private List<Long> subsectionTemplatesId;
     @Schema(description = "Индентификаторы протоколов отчета")

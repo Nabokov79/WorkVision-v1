@@ -16,14 +16,10 @@ import lombok.Setter;
 @Schema(description = "Данные для добавления шаблона раздела паспортных данных диагностируемого оборудования")
 public class NewSectionWithEquipmentPassportDto {
 
-    @Schema(description = "Индентификатор типа документа")
-    @NotNull(message = "documentType id should not be null")
-    @Positive(message = "documentType id can only be positive")
-    private Long documentTypeId;
-    @Schema(description = "Индентификатор типа оборудования")
-    @NotNull(message = " equipmentType id should not be null")
-    @Positive(message = "equipmentType id can only be positive")
-    private Long equipmentTypeId;
+    @Schema(description = "Индентификатор шаблона отчета")
+    @NotNull(message = "report template id should not be null")
+    @Positive(message = "report template id can only be positive")
+    private Long reportTemplateId;
     @Schema(description = "Порядковый номер подраздела")
     @NotNull(message = "sequential number should not be null")
     @Positive(message = "sequential number can only be positive")

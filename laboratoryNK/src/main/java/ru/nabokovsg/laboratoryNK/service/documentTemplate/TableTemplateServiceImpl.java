@@ -29,7 +29,7 @@ public class TableTemplateServiceImpl implements TableTemplateService {
     public ResponseTableTemplateDto save(TableTemplateDto tableDto) {
         TableTemplate tableTemplate = repository.save(mapper.mapToTableTemplate(tableDto
                                                                 , TableType.valueOf(tableDto.getTableType()).label));
-        columnHeaderService.save(tableTemplate, tableDto.getColumnHeaders());
+        tableTemplate.setColumnHeaders(columnHeaderService.save(tableTemplate, tableDto.getColumnHeaders()));
         return mapper.mapToResponseTableTemplateDto(tableTemplate);
     }
 
@@ -38,7 +38,7 @@ public class TableTemplateServiceImpl implements TableTemplateService {
         if (repository.existsById(tableDto.getId())) {
             TableTemplate tableTemplate = repository.save(mapper.mapToTableTemplate(tableDto
                                                                 , TableType.valueOf(tableDto.getTableType()).label));
-            columnHeaderService.save(tableTemplate, tableDto.getColumnHeaders());
+            tableTemplate.setColumnHeaders(columnHeaderService.update(tableTemplate, tableDto.getColumnHeaders()));
             return mapper.mapToResponseTableTemplateDto(tableTemplate);
         }
        throw new NotFoundException(String.format("Table template with id=%s not found for update", tableDto.getId()));

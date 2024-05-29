@@ -19,33 +19,28 @@ public class ReportTemplateServiceImpl implements ReportTemplateService {
 
     private final ReportTemplateRepository repository;
     private final ReportTemplateMapper mapper;
-    private final PageTitleTemplateService pageTitleTemplateService;
-    private final SectionTemplateService sectionTemplateService;
     private final AppendicesTemplateService appendicesTemplateService;
 
     @Override
-    public ResponseReportTemplateDto create(Long documentTypeId, Long equipmentTypeId) {
-        if (repository.existsByDocumentTypeIdAndEquipmentTypeId(documentTypeId, equipmentTypeId)) {
+    public void create(PageTitleTemplate pageTitleTemplate) {
+        if (repository.existsByDocumentTypeIdAndEquipmentTypeId(pageTitleTemplate.getDocumentTypeId()
+                                                              , pageTitleTemplate.getEquipmentTypeId())) {
             throw new BadRequestException(
-                   String.format("ReportTemplate by documentTypeId=%s and equipmentTypeId=%s is create", documentTypeId
-                                                                                                    , equipmentTypeId));
+                   String.format("ReportTemplate by documentTypeId=%s and equipmentTypeId=%s is create"
+                                                           , pageTitleTemplate.getDocumentTypeId()
+                                                           , pageTitleTemplate.getEquipmentTypeId()));
         }
-        PageTitleTemplate pageTitleTemplate = pageTitleTemplateService.getByIds(documentTypeId, equipmentTypeId);
-        ReportTemplate template = repository.save(mapper.mapToReportTemplate(documentTypeId
-                                                                           , equipmentTypeId
-                                                                           , pageTitleTemplate));
-        template.setSectionsTemplate(sectionTemplateService.addReportTemplate(template
-                                    , sectionTemplateService.getAllByIds(documentTypeId
-                                                                       , equipmentTypeId)));
-        template.setAppendices(appendicesTemplateService.addReportTemplate(template
-                                                 , appendicesTemplateService.getAllByEquipmentTypeId(equipmentTypeId)));
-        return mapper.mapToResponseReportTemplateDto(template);
+        repository.save(mapper.mapToReportTemplate(pageTitleTemplate.getDocumentTypeId()
+                                                 , pageTitleTemplate.getEquipmentTypeId()
+                                                 , pageTitleTemplate
+                                                 , appendicesTemplateService.getAllByEquipmentTypeId(
+                                                                             pageTitleTemplate.getEquipmentTypeId())));
+
     }
 
     @Override
     public ResponseReportTemplateDto get(Long id) {
-        return mapper.mapToResponseReportTemplateDto(repository.findById(id).orElseThrow(() -> new NotFoundException(
-                String.format("ReportTemplate with id=%s not found", id))));
+        return mapper.mapToResponseReportTemplateDto(getById(id));
     }
 
     @Override
@@ -54,18 +49,16 @@ public class ReportTemplateServiceImpl implements ReportTemplateService {
     }
 
     @Override
-    public ReportTemplate getByDocumentTypeIdAndEquipmentTypeId(Long documentTypeId, Long equipmentTypeId) {
-        return repository.findByDocumentTypeIdAndEquipmentTypeId(documentTypeId, equipmentTypeId)
-                .orElseThrow(() -> new NotFoundException(
-                        String.format("ReportTemplate by documentTypeId=%s and equipmentTypeId=%s not found"
-                                                                                           , documentTypeId
-                                                                                           , equipmentTypeId)));
+    public ReportTemplate getById(Long id) {
+        return repository.findById(id).orElseThrow(() -> new NotFoundException(
+                String.format("ReportTemplate with id=%s not found", id)));
     }
 
     @Override
-    public ReportTemplate getByDocumentTypeId(Long documentTypeId) {
-        return repository.findByDocumentTypeId(documentTypeId)
+    public ReportTemplate getByDocumentTypeIdAndEquipmentTypeId(Long documentTypeId, Long equipmentTypeId) {
+        return repository.findByDocumentTypeIdAndEquipmentTypeId(documentTypeId, equipmentTypeId)
                 .orElseThrow(() -> new NotFoundException(
-                        String.format("ReportTemplate by documentTypeId=%s  not found", documentTypeId)));
+                String.format("ReportTemplate with documentTypeId=%s and equipmentTypeId=%s not found"
+                                                                 , documentTypeId, equipmentTypeId)));
     }
 }

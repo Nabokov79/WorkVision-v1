@@ -9,9 +9,7 @@ import ru.nabokovsg.laboratoryNK.model.documentTemplate.ColumnHeaderTemplate;
 import ru.nabokovsg.laboratoryNK.model.documentTemplate.TableTemplate;
 import ru.nabokovsg.laboratoryNK.repository.documentTemplate.ColumnHeaderTemplateRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,28 +20,28 @@ public class ColumnHeaderTemplateServiceImpl implements ColumnHeaderTemplateServ
     private final ColumnHeaderTemplateMapper mapper;
 
     @Override
-    public List<ColumnHeaderTemplate> save(TableTemplate tableTemplate
+    public Set<ColumnHeaderTemplate> save(TableTemplate tableTemplate
                                          , List<ColumnHeaderTemplateDto> columnHeaderTemplatesDto) {
-        return repository.saveAll(
-                columnHeaderTemplatesDto.stream()
-                                        .map(t -> mapper.mapToColumnHeaderTemplates(tableTemplate, t
-                                                                                  , t.getHeading()
-                                                                                  , t.getColumnHeaderType()))
-                                       .toList());
-    }
-
-    @Override
-    public List<ColumnHeaderTemplate> update(TableTemplate tableTemplate
-                                           , List<ColumnHeaderTemplateDto> columnHeaderTemplatesDto) {
-        validateIds(columnHeaderTemplatesDto.stream()
-                                           .map(ColumnHeaderTemplateDto::getId)
-                                           .toList());
-        return repository.saveAll(
+        return new HashSet<>(repository.saveAll(
                 columnHeaderTemplatesDto.stream()
                         .map(t -> mapper.mapToColumnHeaderTemplates(tableTemplate, t
                                 , t.getHeading()
                                 , t.getColumnHeaderType()))
-                        .toList());
+                        .toList()));
+    }
+
+    @Override
+    public Set<ColumnHeaderTemplate> update(TableTemplate tableTemplate
+                                           , List<ColumnHeaderTemplateDto> columnHeaderTemplatesDto) {
+        validateIds(columnHeaderTemplatesDto.stream()
+                                           .map(ColumnHeaderTemplateDto::getId)
+                                           .toList());
+        return new HashSet<>(repository.saveAll(
+                columnHeaderTemplatesDto.stream()
+                        .map(t -> mapper.mapToColumnHeaderTemplates(tableTemplate, t
+                                , t.getHeading()
+                                , t.getColumnHeaderType()))
+                        .toList()));
     }
 
     private void validateIds(List<Long> ids) {

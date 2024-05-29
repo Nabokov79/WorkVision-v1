@@ -18,6 +18,7 @@ public class PageTitleTemplateServiceImpl implements PageTitleTemplateService {
 
     private final PageTitleTemplateRepository repository;
     private final PageTitleTemplateMapper mapper;
+    private final ReportTemplateService reportTemplateService;
     private final DocumentHeaderTemplateService documentHeaderService;
     private final DiagnosticDocumentTypeService documentTypeService;
 
@@ -26,13 +27,15 @@ public class PageTitleTemplateServiceImpl implements PageTitleTemplateService {
         if (repository.existsByDocumentTypeIdAndEquipmentTypeId(pageTitleDto.getDocumentTypeId()
                                                               , pageTitleDto.getEquipmentTypeId())) {
             throw new BadRequestException(
-                    String.format("PageTitle template by documentTypeId=%s and equipmentTypeIdId=%s not found"
+                    String.format("PageTitle template by documentTypeId=%s and equipmentTypeIdId=%s is found"
                                                                                 , pageTitleDto.getDocumentTypeId()
                                                                                 , pageTitleDto.getEquipmentTypeId()));
         }
-        return mapper.mapToResponsePageTitleTemplateDto(repository.save(mapper.mapToPageTitleTemplate(pageTitleDto
-                , documentTypeService.getById(pageTitleDto.getDocumentTypeId())
-                , documentHeaderService.getAllByDocumentTypeId(pageTitleDto.getDocumentTypeId()))));
+        PageTitleTemplate pageTitleTemplate = repository.save(mapper.mapToPageTitleTemplate(pageTitleDto
+                                    , documentTypeService.getById(pageTitleDto.getDocumentTypeId())
+                                    , documentHeaderService.getAllByDocumentTypeId(pageTitleDto.getDocumentTypeId())));
+        reportTemplateService.create(pageTitleTemplate);
+        return mapper.mapToResponsePageTitleTemplateDto(pageTitleTemplate);
     }
 
     @Override
