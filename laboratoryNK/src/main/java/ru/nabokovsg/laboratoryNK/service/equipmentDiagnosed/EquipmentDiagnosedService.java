@@ -20,4 +20,6 @@ public interface EquipmentDiagnosedService {
     void delete(Long id);
 
     EquipmentDiagnosed getById(Long id);
+
+    Integer getGeodesyLocationsById(Long id);
 }

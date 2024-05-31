@@ -92,9 +92,23 @@ public class SubsectionTemplateController {
 
     @Operation(summary = "Изменение данных шаблона подраздела с данными приборов измерений и средств контроля")
     @PatchMapping("/measuring-tool")
-    public Mono<Object> updateWithTable(@RequestBody @Valid @Parameter(description = "Шаблон подраздела")
+    public Mono<Object> updateWithMeasuringTool(@RequestBody @Valid @Parameter(description = "Шаблон подраздела")
                                                         UpdateSubsectionWitMeasuringToolTemplateDto subsectionsDto) {
         return client.updateWithMeasuringTool(subsectionsDto);
+    }
+
+    @Operation(summary = "Добавление нового шаблона подраздела раздела с данными приборов измерений и средств контроля")
+    @PostMapping("/conclusion")
+    public Mono<Object> saveWithConclusionTemplate(@RequestBody @Valid @Parameter(description = "Шаблон подраздела")
+                                              NewSubsectionWitConclusionTemplateDto subsectionsDto) {
+        return client.saveWithConclusionTemplate(subsectionsDto);
+    }
+
+    @Operation(summary = "Изменение данных шаблона подраздела с данными приборов измерений и средств контроля")
+    @PatchMapping("/conclusion")
+    public Mono<Object> updateWithConclusionTemplate(@RequestBody @Valid @Parameter(description = "Шаблон подраздела")
+                                        UpdateSubsectionWitConclusionTemplateDto subsectionsDto) {
+        return client.updateWithConclusionTemplate(subsectionsDto);
     }
 
     @Operation(summary = "Получить данные шаблона подраздела")

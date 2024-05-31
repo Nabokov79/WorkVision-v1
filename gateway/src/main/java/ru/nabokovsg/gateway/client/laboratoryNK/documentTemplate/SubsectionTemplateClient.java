@@ -61,6 +61,14 @@ public class SubsectionTemplateClient extends BaseClient {
         return patch(API_PREFIX, subsectionsDto);
     }
 
+    public Mono<Object> saveWithConclusionTemplate(NewSubsectionWitConclusionTemplateDto subsectionsDto) {
+        return post(API_PREFIX, subsectionsDto);
+    }
+
+    public Mono<Object> updateWithConclusionTemplate(UpdateSubsectionWitConclusionTemplateDto subsectionsDto) {
+        return patch(API_PREFIX, subsectionsDto);
+    }
+
     public Mono<Object> get(Long id) {
         return get(String.join(DELIMITER, API_PREFIX, String.valueOf(id)));
     }

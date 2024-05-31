@@ -31,4 +31,7 @@ public class NewEquipmentDto {
     private Boolean old;
     @Schema(description = "Модель")
     private String model;
+    @Schema(description = "Колличество мест проведения измерений геодезии")
+    @NotNull(message = "geodesy locations should not be null")
+    private Integer geodesyLocations;
 }

@@ -26,7 +26,8 @@ public class ResultCalculationsMeasurementsGeodesyServiceImpl implements ResultC
         AcceptableDeviationsGeodesy acceptableDeviationsGeodesy
                 = acceptableDeviationsGeodesyService.getByDataOfEquipmentForCalculations(
                         equipmentDiagnosedService.getById(equipmentId));
-        if (measurements.size() == acceptableDeviationsGeodesy.getNumberLocations()) {
+        int geodesyLocations = equipmentDiagnosedService.getGeodesyLocationsById(equipmentId);
+        if (measurements.size() == geodesyLocations && geodesyLocations > 0) {
             List<GeodesicMeasurement> geodesicMeasurements
                                         = recalculateGeodesyMeasurementsService.recalculateByTransition(measurements);
             referencePointMeasurementService.save(acceptableDeviationsGeodesy, geodesicMeasurements);

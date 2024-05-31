@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import ru.nabokovsg.laboratoryNK.dto.norms.measuredParameter.MeasuredParameterDto;
+import ru.nabokovsg.laboratoryNK.dto.norms.measuredParameter.ResponseMeasuredParameterDto;
 
 import java.util.List;
 
@@ -19,5 +19,5 @@ public class ResponseDefectDto {
     @Schema(description = "Наименование дефекта")
     private String defectName;
     @Schema(description = "Измеряемые параметры дефекта")
-    private List<MeasuredParameterDto> measuredParameters;
+    private List<ResponseMeasuredParameterDto> measuredParameters;
 }

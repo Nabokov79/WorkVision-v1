@@ -33,6 +33,4 @@ public class AcceptableDeviationsGeodesy {
     private Integer maxDifferenceDiametricPoints;
     @Column(name = "measurement_error")
     private Integer measurementError;
-    @Column(name = "number_locations")
-    private Integer numberLocations;
 }

@@ -307,6 +307,8 @@ CREATE TABLE IF NOT EXISTS SUBSECTION_TEMPLATES
     user_text                    VARCHAR,
     division                     VARCHAR,
     table_id                     BIGINT,
+    document_type_id             BIGINT,
+    summary_results              BOOLEAN,
     protocol_report_template_id  BIGINT,
     section_template_id          BIGINT,
     protocol_template_id         BIGINT,
@@ -430,6 +432,7 @@ CREATE TABLE IF NOT EXISTS EQUIPMENT_DIAGNOSED
     volume            INTEGER,
     equipment_full    BOOLEAN,
     old               BOOLEAN,
+    geodesy_locations INTEGER                                 NOT NULL,
     CONSTRAINT pk_equipmentDiagnosed PRIMARY KEY (id),
     CONSTRAINT FK_EQUIPMENT_DIAGNOSED_ON_EQUIPMENT_TYPES FOREIGN KEY (equipment_type_id) REFERENCES equipment_types (id)
 );
@@ -492,9 +495,8 @@ CREATE TABLE IF NOT EXISTS ACCEPTABLE_DEVIATIONS_GEODESY
     max_difference_neighboring_points INTEGER                                 NOT NULL,
     max_difference_diametric_points   INTEGER                                 NOT NULL,
     measurement_error                 INTEGER                                 NOT NULL,
-    number_locations                  INTEGER                                 NOT NULL,
     CONSTRAINT pk_permissibleDeviationsGeodesy PRIMARY KEY (id),
-    CONSTRAINT UQ_PERMISSIBLE_DEVIATIONS_GEODESY UNIQUE (equipment_type_id, fulls, old, number_locations)
+    CONSTRAINT UQ_PERMISSIBLE_DEVIATIONS_GEODESY UNIQUE (equipment_type_id, fulls, old, volume)
 );
 
 CREATE TABLE IF NOT EXISTS ACCEPTABLE_THICKNESS

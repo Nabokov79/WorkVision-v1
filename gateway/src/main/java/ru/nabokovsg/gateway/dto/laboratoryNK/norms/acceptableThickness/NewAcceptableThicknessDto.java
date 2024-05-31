@@ -28,8 +28,6 @@ public class NewAcceptableThicknessDto {
     @Schema(description = "Диаметр элемента(для трубопроводов)")
     private Integer diameter;
     @Schema(description = "Минимальная допустимая толщина стенки элемента")
-    @NotNull(message = "minThickness should not be null")
-    @Positive(message = "minThickness can only be positive")
     private Double minThickness;
     @Schema(description = "Минимальная допустимая толщина стенки элемента в процентах")
     private Integer acceptablePercent;

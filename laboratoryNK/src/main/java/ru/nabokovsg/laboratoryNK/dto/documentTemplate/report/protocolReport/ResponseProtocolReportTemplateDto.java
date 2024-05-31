@@ -23,11 +23,11 @@ public class ResponseProtocolReportTemplateDto {
     @Schema(description = "Подзаголовок протокола")
     private String subtitle;
     @Schema(description = "Текст пользователя после подзаголовка")
-    private String userTextAfterHeading;
+    private String userTextAfterSubtitle;
     @Schema(description = "Шаблоны подразделов")
     private List<ResponseSubsectionTemplateDto> subsections;
     @Schema(description = "Шаблон таблиц")
-    private List<ResponseTableTemplateDto> tables;
+    private List<ResponseTableTemplateDto> tableTemplates;
     @Schema(description = "Заключение по результатм")
     private ResponseConclusionTemplateDto conclusionTemplate;
 }

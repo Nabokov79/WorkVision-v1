@@ -46,8 +46,4 @@ public class NewAcceptableDeviationsGeodesyDto {
     @NotNull(message = "measurementError should not be null")
     @Positive(message = "measurementError can only be positive")
     private Integer measurementError;
-    @Schema(description = "Колличество мест проведения измерений")
-    @NotNull(message = "numberLocations should not be null")
-    @Positive(message = "numberLocationss can only be positive")
-    private Integer numberLocations;
 }

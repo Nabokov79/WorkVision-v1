@@ -22,6 +22,8 @@ public class DefectDto {
     private Boolean notMeetRequirements;
     @Schema(description = "Требуемые вычисления параметров дефекта")
     private String typeCalculation;
+    @Schema(description = "Использовать дефект для расчета остаточной толщины элемента")
+    private Boolean useCalculateThickness;
     @Schema(description = "Измеряемые параметры дефекта")
     private List<MeasuredParameterDto> measuredParameters;
 }

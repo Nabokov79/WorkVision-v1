@@ -78,6 +78,11 @@ public class EquipmentDiagnosedServiceImpl implements EquipmentDiagnosedService 
                 .orElseThrow(() -> new NotFoundException(String.format("Equipment with id=%s not found", id)));
     }
 
+    @Override
+    public Integer getGeodesyLocationsById(Long id) {
+        return repository.findGeodesyLocationsById(id);
+    }
+
     private EquipmentDiagnosed getByPredicate(EquipmentDto equipmentDto) {
         QEquipmentDiagnosed equipment = QEquipmentDiagnosed.equipmentDiagnosed;
         QEquipmentType equipmentType = QEquipmentType.equipmentType;

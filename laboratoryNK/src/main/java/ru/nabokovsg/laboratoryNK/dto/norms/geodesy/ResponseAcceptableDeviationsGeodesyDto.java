@@ -27,6 +27,4 @@ public class ResponseAcceptableDeviationsGeodesyDto {
     private Integer maxDifferenceDiametricPoints;
     @Schema(description = "Допустимая погрешность измерения")
     private Integer measurementError;
-    @Schema(description = "Колличество мест проведения измерений")
-    private Integer numberMeasurements;
 }

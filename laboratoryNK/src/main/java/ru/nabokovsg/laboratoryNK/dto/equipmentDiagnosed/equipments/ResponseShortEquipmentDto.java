@@ -22,4 +22,6 @@ public class ResponseShortEquipmentDto {
     private Integer volume;
     @Schema(description = "Модель")
     private String model;
+    @Schema(description = "Колличество мест проведения измерений геодезии")
+    private Integer geodesyLocations;
 }

@@ -29,6 +29,10 @@ public class SubsectionTemplateDto {
     private DivisionDataDto divisionParam;
     @Schema(description = "Индентификатор таблицы")
     private Long tableId;
+    @Schema(description = "Индентификатор типа документа")
+    private Long documentTypeId;
+    @Schema(description = "Добавить сводную таблицу результатов измерений")
+    private boolean summaryResults;
     @Schema(description = "Данные нормативно-технической документации")
     private List<DocumentationTemplateDto> documentations;
     @Schema(description = "Данные средств контроля и измерений")

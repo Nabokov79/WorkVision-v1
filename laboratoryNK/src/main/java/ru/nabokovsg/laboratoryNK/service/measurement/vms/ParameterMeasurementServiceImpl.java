@@ -3,7 +3,6 @@ package ru.nabokovsg.laboratoryNK.service.measurement.vms;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.nabokovsg.laboratoryNK.dto.measurement.vms.parameterMeasurement.ParameterMeasurementDto;
-import ru.nabokovsg.laboratoryNK.exceptions.NotFoundException;
 import ru.nabokovsg.laboratoryNK.mapper.measurement.vms.ParameterMeasurementMapper;
 import ru.nabokovsg.laboratoryNK.model.measurement.common.ConstParameterMeasurement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.CalculationParameterMeasurement;
@@ -31,6 +30,9 @@ public class ParameterMeasurementServiceImpl extends ConstParameterMeasurement i
                                                             , Set<MeasuredParameter> measuredParameters
                                                             , Set<CalculationParameterMeasurement> parameterMeasurements
                                                             , List<ParameterMeasurementDto> parameterMeasurementsDto) {
+        parameterMeasurements = validCalculationParameter(measuredParameters
+                                                        , parameterMeasurements
+                                                        , parameterMeasurementsDto);
         return new HashSet<>(repository.saveAll(setNumbers(calculationParameters(typeCalculation
                                                                                , parameterMeasurements
                                                                                , parameterMeasurementsDto
@@ -48,6 +50,9 @@ public class ParameterMeasurementServiceImpl extends ConstParameterMeasurement i
                                                             , Set<MeasuredParameter> measuredParameters
                                                             , Set<CalculationParameterMeasurement> parameterMeasurements
                                                             , List<ParameterMeasurementDto> parameterMeasurementsDto) {
+        parameterMeasurements = validCalculationParameter(measuredParameters
+                                                        , parameterMeasurements
+                                                        , parameterMeasurementsDto);
         return new HashSet<>(repository.saveAll(setNumbers(calculationParameters(typeCalculation
                                                                                , parameterMeasurements
                                                                                , parameterMeasurementsDto
@@ -64,84 +69,47 @@ public class ParameterMeasurementServiceImpl extends ConstParameterMeasurement i
             , Set<MeasuredParameter> measuredParameters
             , Set<CalculationParameterMeasurement> parameterMeasurements
             , List<ParameterMeasurementDto> parameterMeasurementsDto) {
-        return new HashSet<>(repository.saveAll(calculation(typeCalculation
-                , parameterMeasurements
-                , parameterMeasurementsDto)));
+        return new HashSet<>(repository.saveAll(calculationParameters(typeCalculation
+                                                                    , parameterMeasurements
+                                                                    , parameterMeasurementsDto
+                                                                    , measuredParameters)));
     }
 
     private Set<CalculationParameterMeasurement> calculationParameters(TypeCalculation typeCalculation
             , Set<CalculationParameterMeasurement> parameterMeasurements
             , List<ParameterMeasurementDto> parameterMeasurementsDto
             , Set<MeasuredParameter> measuredParameters) {
-        Set<CalculationParameterMeasurement> calculations = calculation(typeCalculation
-                , parameterMeasurements
-                , parameterMeasurementsDto);
-        if (calculations.isEmpty()) {
+        final Map<Long, CalculationParameterMeasurement> parameterMeasurementsDb = parameterMeasurements.stream()
+                                        .collect(Collectors.toMap(CalculationParameterMeasurement::getId, c -> c));
+        switch (typeCalculation) {
+            case QUANTITY, SQUARE -> { return calculationService.calculationDefectOrRepair(typeCalculation
+                    , parameterMeasurementsDb
+                    , parameterMeasurementsDto);}
+            case MAX, MIN, MAX_MIN -> {
+                Map<Long, MeasuredParameter> measuredParametersDb = measuredParameters.stream()
+                        .collect(Collectors.toMap(MeasuredParameter::getId, m -> m));
+                return parameterMeasurementsDto.stream()
+                        .map(p -> calculationService.calculationParameterMeasurement(measuredParametersDb.get(p.getParameterId())
+                                , parameterMeasurementsDb.get(p.getParameterId())
+                                , p))
+                        .collect(Collectors.toSet());
+            }
+            default -> {return parameterMeasurements;}
+        }
+    }
+
+    private Set<CalculationParameterMeasurement> validCalculationParameter(Set<MeasuredParameter> measuredParameters
+                                                            , Set<CalculationParameterMeasurement> parameterMeasurements
+                                                            , List<ParameterMeasurementDto> parameterMeasurementsDto) {
+        if(parameterMeasurements.isEmpty()) {
             Map<Long, MeasuredParameter> measuredParametersDb = measuredParameters.stream()
                                                            .collect(Collectors.toMap(MeasuredParameter::getId, m -> m));
-            Map<String, CalculationParameterMeasurement> parameterMeasurementsDb = parameterMeasurements.stream()
-                                  .collect(Collectors.toMap(CalculationParameterMeasurement::getParameterName, c -> c));
-            calculations = parameterMeasurementsDto.stream()
-                                                   .map(p -> {
-                MeasuredParameter measuredParameter = measuredParametersDb.get(p.getParameterId());
-                return calculationParameterMeasurement(measuredParameter
-                                                     , parameterMeasurementsDb.get(measuredParameter.getParameterName())
-                                                     , p);
-            })
-                                                    .collect(Collectors.toSet());
+            return parameterMeasurementsDto.stream()
+                                           .map(p -> mapper.mapToParameterMeasurement(p
+                                                                        , measuredParametersDb.get(p.getParameterId())))
+                                           .collect(Collectors.toSet());
         }
-        return calculations;
-    }
-
-    private Set<CalculationParameterMeasurement> calculation(TypeCalculation typeCalculation
-            , Set<CalculationParameterMeasurement> parameterMeasurements
-            , List<ParameterMeasurementDto> parameterMeasurementsDto) {
-        Map<Long, CalculationParameterMeasurement> parameterMeasurementsDb = parameterMeasurements.stream()
-                .collect(Collectors.toMap(CalculationParameterMeasurement::getId, r -> r));
-        switch (typeCalculation) {
-            case SQUARE -> {
-                return calculationService.countSquare(
-                        parameterMeasurements.stream()
-                                .collect(Collectors.toMap(CalculationParameterMeasurement::getId, p -> p))
-                        , parameterMeasurementsDto.stream()
-                                .collect(Collectors.toMap(p -> parameterMeasurementsDb.get(p.getParameterId())
-                                                .getParameterName()
-                                        , p -> p)));
-            }
-            case QUANTITY -> {
-                return calculationService.countQuantity(
-                        parameterMeasurements.stream()
-                                .collect(Collectors.toMap(CalculationParameterMeasurement::getId, p -> p))
-                        , parameterMeasurementsDto.stream()
-                                .collect(Collectors.toMap(p -> parameterMeasurementsDb.get(p.getParameterId())
-                                                .getParameterName()
-                                        , p -> p)));
-            }
-            default -> {
-                return new HashSet<>();
-            }
-        }
-    }
-
-    private CalculationParameterMeasurement calculationParameterMeasurement(MeasuredParameter measuredParameter
-            , CalculationParameterMeasurement parameterMeasurement
-            , ParameterMeasurementDto parameterMeasurementDto) {
-        switch (measuredParameter.getTypeCalculation()) {
-            case MIN -> {
-                return calculationService.countMin(parameterMeasurement, parameterMeasurementDto);
-            }
-            case MAX -> {
-                return calculationService.countMax(parameterMeasurement, parameterMeasurementDto);
-            }
-            case MAX_MIN -> {
-                return calculationService.countMaxAndMin(parameterMeasurement, parameterMeasurementDto);
-            }
-            case NO_ACTION -> {
-                return mapper.mapToParameterMeasurement(parameterMeasurementDto, measuredParameter);
-            }
-            default -> throw new NotFoundException(String.format("Unknown type=%s calculation parameters"
-                    , measuredParameter.getTypeCalculation()));
-        }
+        return parameterMeasurements;
     }
 
     private Set<CalculationParameterMeasurement> setNumbers(Set<CalculationParameterMeasurement> calculations

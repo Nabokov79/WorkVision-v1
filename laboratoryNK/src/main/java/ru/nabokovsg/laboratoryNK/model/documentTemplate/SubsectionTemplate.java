@@ -31,6 +31,10 @@ public class SubsectionTemplate {
     private String userText;
     @Column(name = "division")
     private String division;
+    @Column(name = "document_type_id")
+    private Long documentTypeId;
+    @Column(name = "summary_results")
+    private boolean summaryResults;
     @OneToOne
     @JoinColumn(name = "table_id", referencedColumnName = "id")
     private TableTemplate tableTemplate;

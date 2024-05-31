@@ -13,7 +13,7 @@ import ru.nabokovsg.gateway.dto.laboratoryNK.measurement.vms.defectMeasurement.U
 @Service
 public class DefectMeasurementClient extends BaseClient {
 
-    private static final String API_PREFIX = "/measurement/repair";
+    private static final String API_PREFIX = "/measurement/defect";
     private static final String DELIMITER = "/";
 
     @Autowired

@@ -25,4 +25,6 @@ public class EquipmentDto {
     private Boolean old;
     @Schema(description = "Модель")
     private String model;
+    @Schema(description = "Колличество мест проведения измерений геодезии")
+    private Integer geodesyLocations;
 }

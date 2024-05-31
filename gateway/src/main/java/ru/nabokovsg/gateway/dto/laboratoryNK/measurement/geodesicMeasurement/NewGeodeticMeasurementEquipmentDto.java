@@ -18,10 +18,6 @@ import java.util.List;
 @Schema(description = "Результат измерений в одном месте проведения геодезии(нивелирования)")
 public class NewGeodeticMeasurementEquipmentDto {
 
-    @Schema(description = "Индентификатор")
-    @NotNull(message = "id should not be null")
-    @Positive(message = "id can only be positive")
-    private Long id;
     @Schema(description = "Индентификатор записи в журнале обследований")
     @NotNull(message = "surveyJournal id should not be null")
     @Positive(message = "surveyJournal id can only be positive")

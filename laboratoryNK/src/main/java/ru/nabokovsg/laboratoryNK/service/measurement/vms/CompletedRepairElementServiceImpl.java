@@ -112,7 +112,9 @@ public class CompletedRepairElementServiceImpl implements CompletedRepairElement
         booleanBuilder.and(repair.surveyJournalId.eq(repairDto.getSurveyJournalId()));
         booleanBuilder.and(repair.equipmentId.eq(repairDto.getEquipmentId()));
         booleanBuilder.and(repair.elementId.eq(repairDto.getElementId()));
-        booleanBuilder.and(repair.repairId.eq(repairDto.getRepairId()));
+        if(repairDto.getRepairId() != null) {
+            booleanBuilder.and(repair.repairId.eq(repairDto.getRepairId()));
+        }
         if (repairDto.getPartElementId() != null) {
             booleanBuilder.and(repair.partElementId.eq(repairDto.getPartElementId()));
         }

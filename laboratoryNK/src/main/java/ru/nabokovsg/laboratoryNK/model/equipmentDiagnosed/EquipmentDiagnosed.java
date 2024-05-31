@@ -36,6 +36,8 @@ public class EquipmentDiagnosed {
     private Boolean old;
     @Column(name = "model")
     private String model;
+    @Column(name = "geodesy_locations")
+    private Integer geodesyLocations;
     @OneToMany(mappedBy = "equipmentDiagnosed", fetch = FetchType.LAZY)
     private Set<EquipmentElement> elements;
     @OneToMany(mappedBy = "equipmentDiagnosed", fetch = FetchType.LAZY)

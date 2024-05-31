@@ -70,8 +70,11 @@ public class ElementRepairServiceImpl implements ElementRepairService {
 
     @Override
     public ElementRepair getById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("Repair method with id=%s not found", id)));
+        if (id != null) {
+            return repository.findById(id)
+                    .orElseThrow(() -> new NotFoundException(String.format("Repair method with id=%s not found", id)));
+        }
+        return null;
     }
 
     private TypeCalculation getTypeCalculation(String calculation) {
