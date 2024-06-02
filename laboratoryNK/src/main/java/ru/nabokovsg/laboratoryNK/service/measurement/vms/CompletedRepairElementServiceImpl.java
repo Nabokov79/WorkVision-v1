@@ -11,6 +11,7 @@ import ru.nabokovsg.laboratoryNK.exceptions.NotFoundException;
 import ru.nabokovsg.laboratoryNK.mapper.measurement.vms.CompletedRepairElementMapper;
 import ru.nabokovsg.laboratoryNK.model.equipmentDiagnosed.EquipmentElement;
 import ru.nabokovsg.laboratoryNK.model.equipmentDiagnosed.PartElement;
+import ru.nabokovsg.laboratoryNK.model.measurement.CalculationParameterMeasurementBuilder;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.CompletedRepairElement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.QCompletedRepairElement;
 import ru.nabokovsg.laboratoryNK.model.norms.ElementRepair;
@@ -48,11 +49,13 @@ public class CompletedRepairElementServiceImpl implements CompletedRepairElement
             }
             repair = repository.save(repair);
         }
-        repair.getParameterMeasurements().addAll(parameterMeasurementService.saveForCompletedRepair( repair
-                                                                       , elementRepair.getTypeCalculation()
-                                                                       , elementRepair.getMeasuredParameters()
-                                                                       , repair.getParameterMeasurements()
-                                                                       , repairDto.getParameterMeasurements()));
+        repair.getParameterMeasurements().addAll(parameterMeasurementService.save(
+                new CalculationParameterMeasurementBuilder.Builder()
+                        .repair(repair)
+                        .typeCalculation(elementRepair.getTypeCalculation())
+                        .measuredParameters(elementRepair.getMeasuredParameters())
+                        .parameterMeasurementsDto(repairDto.getParameterMeasurements())
+                        .build()));
         return mapper.mapToResponseCompletedRepairElementDto(repair);
     }
 
@@ -68,10 +71,13 @@ public class CompletedRepairElementServiceImpl implements CompletedRepairElement
                 repair = mapper.mapWithPartElement(repair, partsElement.get(repairDto.getPartElementId()));
             }
             repair = repository.save(repair);
-            repair.setParameterMeasurements(parameterMeasurementService.update(elementRepair.getTypeCalculation()
-                    , elementRepair.getMeasuredParameters()
-                    , repair.getParameterMeasurements()
-                    , repairDto.getParameterMeasurements()));
+            repair.setParameterMeasurements(parameterMeasurementService.save(
+                    new CalculationParameterMeasurementBuilder.Builder()
+                            .repair(repair)
+                            .typeCalculation(elementRepair.getTypeCalculation())
+                            .measuredParameters(elementRepair.getMeasuredParameters())
+                            .parameterMeasurementsDto(repairDto.getParameterMeasurements())
+                            .build()));
             return mapper.mapToResponseCompletedRepairElementDto(repair);
         }
         throw new NotFoundException(

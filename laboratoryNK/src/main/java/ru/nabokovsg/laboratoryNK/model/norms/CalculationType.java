@@ -2,7 +2,7 @@ package ru.nabokovsg.laboratoryNK.model.norms;
 
 import java.util.Optional;
 
-public enum TypeCalculation {
+public enum CalculationType {
 
     QUANTITY,
     SQUARE,
@@ -11,8 +11,8 @@ public enum TypeCalculation {
     MAX_MIN,
     NO_ACTION;
 
-    public static Optional<TypeCalculation> from(String calculation) {
-        for (TypeCalculation type : values()) {
+    public static Optional<CalculationType> from(String calculation) {
+        for (CalculationType type : values()) {
             if (type.name().equalsIgnoreCase(calculation)) {
                 return Optional.of(type);
             }

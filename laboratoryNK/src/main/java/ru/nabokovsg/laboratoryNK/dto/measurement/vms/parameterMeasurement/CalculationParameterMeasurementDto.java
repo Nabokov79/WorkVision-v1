@@ -17,12 +17,12 @@ public class CalculationParameterMeasurementDto {
     private Long id;
     @Schema(description = "Наименование параметра")
     private String parameterName;
+    @Schema(description = "Рассчитанное минимальное значение параметра")
+    private Double firstValue;
+    @Schema(description = "Рассчитанное максимальное значение параметра")
+    private Double secondValue;
     @Schema(description = "Единица измерения параметра")
     private String unitMeasurement;
     @Schema(description = "Рассчитанное значение параметра")
     private Double parameterValue;
-    @Schema(description = "Рассчитанное минимальное значение параметра")
-    private Double minValue;
-    @Schema(description = "Рассчитанное максимальное значение параметра")
-    private Double maxValue;
 }

@@ -28,7 +28,7 @@ public class MeasuredParameterServiceImpl implements MeasuredParameterService {
                           constService.getMeasuredParameter(p.getMeasuredParameter())
                         , constService.getUnitMeasurement(p.getUnitMeasurement())
                         , defect
-                        , getTypeOfParameterCalculation(p.getTypeCalculation())))
+                        , getCalculationType(p.getTypeCalculation())))
                 .toList()));
     }
 
@@ -40,7 +40,7 @@ public class MeasuredParameterServiceImpl implements MeasuredParameterService {
                                   constService.getMeasuredParameter(p.getMeasuredParameter())
                                 , constService.getUnitMeasurement(p.getUnitMeasurement())
                                 , repair
-                                , getTypeOfParameterCalculation(p.getTypeCalculation())))
+                                , getCalculationType(p.getTypeCalculation())))
                         .toList())
         );
     }
@@ -65,8 +65,8 @@ public class MeasuredParameterServiceImpl implements MeasuredParameterService {
         return measuredParameters;
     }
 
-    private TypeOfParameterCalculation getTypeOfParameterCalculation(String calculation) {
-        return TypeOfParameterCalculation.from(calculation).orElseThrow(
+    private CalculationType getCalculationType(String calculation) {
+        return CalculationType.from(calculation).orElseThrow(
                 () -> new BadRequestException(
                         String.format("Unsupported measured parameter calculation type=%s", calculation)));
     }

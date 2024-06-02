@@ -16,7 +16,9 @@ import ru.nabokovsg.laboratoryNK.model.equipmentDiagnosed.QEquipmentDiagnosed;
 import ru.nabokovsg.laboratoryNK.model.equipmentDiagnosed.QEquipmentElement;
 import ru.nabokovsg.laboratoryNK.repository.equipmentDiagnosed.EquipmentElementRepository;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -64,6 +66,15 @@ public class EquipmentElementServiceImpl implements EquipmentElementService {
                          .stream()
                          .map(mapper::mapToElementDto)
                          .toList();
+    }
+
+    @Override
+    public Set<String> getAllElementName(Long id) {
+        QEquipmentElement element = QEquipmentElement.equipmentElement;
+        return new HashSet<>(new JPAQueryFactory(em).from(element)
+                                                    .select(element.elementName)
+                                                    .where(QEquipmentDiagnosed.equipmentDiagnosed.id.eq(id))
+                                                    .fetch());
     }
 
     @Override

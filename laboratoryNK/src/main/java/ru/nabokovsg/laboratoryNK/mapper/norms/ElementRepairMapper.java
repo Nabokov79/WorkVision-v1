@@ -6,7 +6,7 @@ import ru.nabokovsg.laboratoryNK.dto.norms.elementRepair.ElementRepairDto;
 import ru.nabokovsg.laboratoryNK.dto.norms.elementRepair.ResponseElementRepairDto;
 import ru.nabokovsg.laboratoryNK.dto.norms.elementRepair.ResponseShortElementRepairDto;
 import ru.nabokovsg.laboratoryNK.model.norms.ElementRepair;
-import ru.nabokovsg.laboratoryNK.model.norms.TypeCalculation;
+import ru.nabokovsg.laboratoryNK.model.norms.CalculationType;
 
 @Mapper(componentModel = "spring")
 public interface ElementRepairMapper {
@@ -14,7 +14,7 @@ public interface ElementRepairMapper {
     @Mapping(source = "repairDto.id", target = "id")
     @Mapping(source = "repairDto.repairName", target = "repairName")
     @Mapping(source = "typeCalculation", target = "typeCalculation")
-    ElementRepair mapToElementRepair(ElementRepairDto repairDto, TypeCalculation typeCalculation);
+    ElementRepair mapToElementRepair(ElementRepairDto repairDto, CalculationType typeCalculation);
 
     ResponseElementRepairDto mapToResponseElementRepairDto(ElementRepair repair);
 

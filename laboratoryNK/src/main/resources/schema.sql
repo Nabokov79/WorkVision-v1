@@ -723,7 +723,7 @@ CREATE TABLE IF NOT EXISTS CALCULATION_PARAMETERS
     number                INTEGER,
     sequential_number     INTEGER,
     parameter_name        VARCHAR                                 NOT NULL,
-    first_value           DOUBLE PRECISION                        NOT NULL,
+    first_value           DOUBLE PRECISION,
     second_value          DOUBLE PRECISION,
     unit_measurement      VARCHAR                                 NOT NULL,
     defect_measurement_id BIGINT,

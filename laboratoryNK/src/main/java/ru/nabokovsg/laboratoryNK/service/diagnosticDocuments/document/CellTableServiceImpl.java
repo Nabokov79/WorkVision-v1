@@ -4,15 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.nabokovsg.laboratoryNK.dto.measurement.common.equipmentInspection.ResponseEquipmentInspectionDto;
 import ru.nabokovsg.laboratoryNK.dto.measurement.common.equipmentRepair.ResponseEquipmentRepairDto;
-import ru.nabokovsg.laboratoryNK.mapper.diagnosticDocument.document.CellTableMapper;
 import ru.nabokovsg.laboratoryNK.model.common.SurveyJournal;
 import ru.nabokovsg.laboratoryNK.model.diagnosticDocuments.document.CellTable;
 import ru.nabokovsg.laboratoryNK.model.diagnosticDocuments.document.DocumentTable;
 import ru.nabokovsg.laboratoryNK.model.documentTemplate.ColumnHeaderTemplate;
-import ru.nabokovsg.laboratoryNK.model.documentTemplate.ColumnHeaderType;
 import ru.nabokovsg.laboratoryNK.model.documentTemplate.TableTemplate;
 import ru.nabokovsg.laboratoryNK.model.measurement.HardnessMeasurement;
 import ru.nabokovsg.laboratoryNK.model.measurement.gm.ControlPoint;
+import ru.nabokovsg.laboratoryNK.model.measurement.gm.DeviationYear;
 import ru.nabokovsg.laboratoryNK.model.measurement.gm.PointDifference;
 import ru.nabokovsg.laboratoryNK.model.measurement.gm.ReferencePoint;
 import ru.nabokovsg.laboratoryNK.model.measurement.utm.ResultUltrasonicThicknessMeasurement;
@@ -20,6 +19,7 @@ import ru.nabokovsg.laboratoryNK.model.measurement.vms.CompletedRepairElement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.DefectMeasurement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.VisualInspection;
 import ru.nabokovsg.laboratoryNK.repository.document.CellTableRepository;
+import ru.nabokovsg.laboratoryNK.service.equipmentDiagnosed.EquipmentElementService;
 import ru.nabokovsg.laboratoryNK.service.measurement.common.EquipmentInspectionService;
 import ru.nabokovsg.laboratoryNK.service.measurement.common.EquipmentRepairService;
 import ru.nabokovsg.laboratoryNK.service.measurement.gm.ControlPointMeasurementService;
@@ -32,7 +32,6 @@ import ru.nabokovsg.laboratoryNK.service.measurement.vms.DefectMeasurementServic
 import ru.nabokovsg.laboratoryNK.service.measurement.vms.VisualInspectionService;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,7 +39,6 @@ import java.util.stream.Collectors;
 public class CellTableServiceImpl implements CellTableService {
 
     private final CellTableRepository repository;
-
     private final CellFactoryService cellFactoryService;
     private final EquipmentInspectionService inspectionService;
     private final ReferencePointMeasurementService referencePointMeasurementService;
@@ -52,6 +50,7 @@ public class CellTableServiceImpl implements CellTableService {
     private final CompletedRepairElementService completedRepairElementService;
     private final VisualInspectionService visualInspectionService;
     private final EquipmentRepairService equipmentRepairService;
+    private final EquipmentElementService elementService;
 
     @Override
     public void saveEquipmentInspection(DocumentTable table, TableTemplate tableTemplate, SurveyJournal surveyJournal) {
@@ -91,7 +90,38 @@ public class CellTableServiceImpl implements CellTableService {
 
     @Override
     public void saveReferencePointMeasurement(DocumentTable table, TableTemplate tableTemplate, SurveyJournal surveyJournal) {
-        Set<ReferencePoint> points = referencePointMeasurementService.getAll(surveyJournal.getId(), surveyJournal.getEquipmentId());
+        Map<Integer, ReferencePoint> points = referencePointMeasurementService.getAll(surveyJournal.getId()
+                                                                                    , surveyJournal.getEquipmentId())
+                                                    .stream()
+                                                    .collect(Collectors.toMap(ReferencePoint::getPlaceNumber, r -> r));
+        Map<String, Integer> columnHeaders = tableTemplate.getColumnHeaders().stream()
+                .collect(Collectors.toMap(ColumnHeaderTemplate::getColumnHeaderType
+                        , ColumnHeaderTemplate::getSequentialNumber));
+        List<CellTable> cells = new ArrayList<>();
+        for (int i = 1; i <= points.size(); i++) {
+            ReferencePoint point = points.get(i);
+            cells.add(cellFactoryService.createPlaceNumberCell(columnHeaders
+                    , i
+                    , String.valueOf(point.getPlaceNumber())
+                    , table));
+            cells.add(cellFactoryService.createHeightCell(columnHeaders
+                    , i
+                    , String.valueOf(point.getCalculatedHeight())
+                    , table));
+            cells.add(cellFactoryService.createDeviationCell(columnHeaders
+                    , i
+                    , String.valueOf(point.getDeviation())
+                    , table));
+            int finalI = i;
+            point.getDeviationYeas().stream()
+                    .sorted(Comparator.comparing(DeviationYear::getYear))
+                    .forEach(d -> cells.add(cellFactoryService.createDeviationCell(columnHeaders
+                            , finalI
+                            , String.valueOf(d.getDeviation())
+                            , table)));
+
+        }
+        repository.saveAll(cells);
     }
 
     @Override
@@ -106,6 +136,37 @@ public class CellTableServiceImpl implements CellTableService {
     public void saveHardnessMeasurement(DocumentTable table, TableTemplate tableTemplate, SurveyJournal surveyJournal) {
         Set<HardnessMeasurement> measurements = hardnessMeasurementService.getAllByIds(surveyJournal.getId()
                                                                                      , surveyJournal.getEquipmentId());
+        Map<String, Integer> columnHeaders = tableTemplate.getColumnHeaders().stream()
+                .collect(Collectors.toMap(ColumnHeaderTemplate::getColumnHeaderType
+                        , ColumnHeaderTemplate::getSequentialNumber));
+        int stringSequentialNumber = 1;
+        List<CellTable> cells = new ArrayList<>();
+        for (HardnessMeasurement measurement : measurements) {
+            cells.add(cellFactoryService.createStringNumberCell(columnHeaders, stringSequentialNumber, table));
+            cells.add(cellFactoryService.createElementCell(columnHeaders
+                    , 0
+                    , stringSequentialNumber
+                    , measurement.getElementName()
+                    , table));
+            if (measurement.getDiameter() != null) {
+                cells.add(cellFactoryService.createDiameterCell(columnHeaders
+                        , stringSequentialNumber
+                        , String.valueOf(measurement.getDiameter())
+                        , table));
+            }
+            if (measurement.getMeasurementNumber() != null) {
+                cells.add(cellFactoryService.createPlaceNumberCell(columnHeaders
+                        , stringSequentialNumber
+                        , String.valueOf(measurement.getMeasurementNumber())
+                        , table));
+            }
+            cells.add(cellFactoryService.createHardnessCell(columnHeaders
+                    , stringSequentialNumber
+                    , String.valueOf(measurement.getMeasurementValue())
+                    , table));
+            stringSequentialNumber++;
+        }
+        repository.saveAll(cells);
     }
 
     @Override
@@ -159,6 +220,7 @@ public class CellTableServiceImpl implements CellTableService {
             }
             stringSequentialNumber++;
         }
+
         repository.saveAll(cells);
     }
 
@@ -167,6 +229,7 @@ public class CellTableServiceImpl implements CellTableService {
         Map<String, Integer> columnHeaders = tableTemplate.getColumnHeaders().stream()
                                                   .collect(Collectors.toMap(ColumnHeaderTemplate::getColumnHeaderType
                                                                           , ColumnHeaderTemplate::getSequentialNumber));
+
         List<CellTable> cells = new ArrayList<>();
         Map<String, Integer> mergeLines = new HashMap<>();
         Map<String, List<DefectMeasurement>> defectsMeasurement = new HashMap<>();
@@ -191,28 +254,31 @@ public class CellTableServiceImpl implements CellTableService {
                                     mergeLines.put(r.getElementName(), r.getParameterMeasurements().size());
                                 }
                             });
-
-        mergeLines.keySet().forEach(k -> {
-            int stringSequentialNumber = 1;
-            cells.add(cellFactoryService.createElementCell(columnHeaders
-                                                         , mergeLines.get(k)
-                                                         , stringSequentialNumber
-                                                         , k
-                                                         , table));
-            cells.addAll(cellFactoryService.createDefectCell(columnHeaders
-                                                           , defectsMeasurement.get(k)
-                                                           , stringSequentialNumber
-                                                           , table));
-            cells.addAll(cellFactoryService.createRepairElementCell(columnHeaders
-                                                                  , repairElements.get(k)
+        elementService.getAllElementName(surveyJournal.getEquipmentId())
+                .stream()
+                .filter(s -> !mergeLines.containsKey(s))
+                .collect(Collectors.toSet())
+                .forEach(k -> {
+                     int stringSequentialNumber = 1;
+                     cells.add(cellFactoryService.createElementCell(columnHeaders
+                                                                  , mergeLines.get(k)
                                                                   , stringSequentialNumber
+                                                                  , k
                                                                   , table));
-            cells.add(cellFactoryService.createVisualInspectionCell(columnHeaders
-                                                                  , stringSequentialNumber
-                                                                  , visualInspections.get(k)
-                                                                  , table));
-            stringSequentialNumber += mergeLines.get(k);
-        });
+                     cells.addAll(cellFactoryService.createDefectCell(columnHeaders
+                                                                    , defectsMeasurement.get(k)
+                                                                    , stringSequentialNumber
+                                                                    , table));
+                     cells.addAll(cellFactoryService.createRepairElementCell(columnHeaders
+                                                                           , repairElements.get(k)
+                                                                           , stringSequentialNumber
+                                                                           , table));
+                     cells.add(cellFactoryService.createVisualInspectionCell(columnHeaders
+                                                                           , stringSequentialNumber
+                                                                           , visualInspections.get(k)
+                                                                           , table));
+                     stringSequentialNumber += mergeLines.get(k);
+                });
         repository.saveAll(cells);
     }
 }

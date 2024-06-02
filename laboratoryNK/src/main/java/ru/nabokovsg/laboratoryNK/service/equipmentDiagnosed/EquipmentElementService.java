@@ -7,6 +7,7 @@ import ru.nabokovsg.laboratoryNK.model.equipmentDiagnosed.EquipmentElement;
 import ru.nabokovsg.laboratoryNK.model.equipmentDiagnosed.PartElement;
 
 import java.util.List;
+import java.util.Set;
 
 public interface EquipmentElementService {
 
@@ -17,6 +18,8 @@ public interface EquipmentElementService {
     ResponseElementDto get(Long id);
 
     List<ResponseElementDto> getAll(Long id);
+
+    Set<String> getAllElementName(Long id);
 
     EquipmentElement getById(Long id);
 

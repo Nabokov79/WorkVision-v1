@@ -9,7 +9,7 @@ import ru.nabokovsg.laboratoryNK.exceptions.BadRequestException;
 import ru.nabokovsg.laboratoryNK.exceptions.NotFoundException;
 import ru.nabokovsg.laboratoryNK.mapper.norms.ElementRepairMapper;
 import ru.nabokovsg.laboratoryNK.model.norms.ElementRepair;
-import ru.nabokovsg.laboratoryNK.model.norms.TypeCalculation;
+import ru.nabokovsg.laboratoryNK.model.norms.CalculationType;
 import ru.nabokovsg.laboratoryNK.repository.norms.ElementRepairRepository;
 
 import java.util.List;
@@ -77,8 +77,8 @@ public class ElementRepairServiceImpl implements ElementRepairService {
         return null;
     }
 
-    private TypeCalculation getTypeCalculation(String calculation) {
-        return TypeCalculation.from(calculation).orElseThrow(
+    private CalculationType getTypeCalculation(String calculation) {
+        return CalculationType.from(calculation).orElseThrow(
                 () -> new BadRequestException(
                         String.format("Unsupported element repair calculation type=%s", calculation)));
     }

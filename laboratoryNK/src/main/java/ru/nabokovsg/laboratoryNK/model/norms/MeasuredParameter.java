@@ -23,7 +23,7 @@ public class MeasuredParameter {
     private String unitMeasurement;
     @Column(name = "type_calculation")
     @Enumerated(EnumType.STRING)
-    private TypeOfParameterCalculation typeCalculation;
+    private CalculationType typeCalculation;
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "defect_id", nullable = false)
     private Defect defect;

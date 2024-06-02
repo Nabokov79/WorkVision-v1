@@ -22,6 +22,15 @@ public interface ParameterMeasurementMapper {
     CalculationParameterMeasurement mapToParameterMeasurement(ParameterMeasurementDto parameterMeasurementDto
                                                             , MeasuredParameter measuredParameter);
 
+    @Mapping(source = "measuredParameter.parameterName", target = "parameterName")
+    @Mapping(target = "firstValue", ignore = true)
+    @Mapping(source = "measuredParameter.unitMeasurement", target = "unitMeasurement")
+    @Mapping(target = "defectMeasurement", ignore = true)
+    @Mapping(target = "completedRepairElement", ignore = true)
+    @Mapping(target = "secondValue", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    CalculationParameterMeasurement mapToNewParameterMeasurement(MeasuredParameter measuredParameter);
+
     @Mapping(source = "defect", target = "defectMeasurement")
     CalculationParameterMeasurement mapWithDefectMeasurement(@MappingTarget CalculationParameterMeasurement parameter
                                                                           , DefectMeasurement defect);
@@ -29,4 +38,13 @@ public interface ParameterMeasurementMapper {
     @Mapping(source = "repair", target = "completedRepairElement")
     CalculationParameterMeasurement mapWithCompletedRepairElement(
                                @MappingTarget CalculationParameterMeasurement parameter, CompletedRepairElement repair);
+
+    @Mapping(source = "parameterName", target = "parameterName")
+    @Mapping(source = "firstValue", target = "firstValue")
+    @Mapping(source = "unitMeasurement", target = "unitMeasurement")
+    @Mapping(target = "defectMeasurement", ignore = true)
+    @Mapping(target = "completedRepairElement", ignore = true)
+    @Mapping(target = "secondValue", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    CalculationParameterMeasurement mapToShortCalculationParameter(String parameterName, Double firstValue, String unitMeasurement);
 }

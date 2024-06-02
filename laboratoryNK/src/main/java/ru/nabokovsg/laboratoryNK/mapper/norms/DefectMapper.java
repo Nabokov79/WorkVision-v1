@@ -6,7 +6,7 @@ import ru.nabokovsg.laboratoryNK.dto.norms.defects.DefectDto;
 import ru.nabokovsg.laboratoryNK.dto.norms.defects.ResponseDefectDto;
 import ru.nabokovsg.laboratoryNK.dto.norms.defects.ResponseShortDefectDto;
 import ru.nabokovsg.laboratoryNK.model.norms.Defect;
-import ru.nabokovsg.laboratoryNK.model.norms.TypeCalculation;
+import ru.nabokovsg.laboratoryNK.model.norms.CalculationType;
 
 @Mapper(componentModel = "spring")
 public interface DefectMapper {
@@ -16,7 +16,7 @@ public interface DefectMapper {
     @Mapping(source = "typeCalculation", target = "typeCalculation")
     @Mapping(source = "defectDto.notMeetRequirements", target = "notMeetRequirements")
     @Mapping(source = "defectDto.useCalculateThickness", target = "useCalculateThickness")
-    Defect mapToDefect(DefectDto defectDto, TypeCalculation typeCalculation);
+    Defect mapToDefect(DefectDto defectDto, CalculationType typeCalculation);
 
     ResponseDefectDto mapToResponseDefectDto(Defect defect);
 

@@ -1,69 +1,61 @@
 package ru.nabokovsg.laboratoryNK.service.measurement.vms;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.nabokovsg.laboratoryNK.dto.measurement.vms.parameterMeasurement.ParameterMeasurementDto;
 import ru.nabokovsg.laboratoryNK.exceptions.NotFoundException;
 import ru.nabokovsg.laboratoryNK.mapper.measurement.vms.ParameterMeasurementMapper;
+import ru.nabokovsg.laboratoryNK.model.measurement.CalculationParameterMeasurementBuilder;
 import ru.nabokovsg.laboratoryNK.model.measurement.common.ConstParameterMeasurement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.CalculationParameterMeasurement;
 import ru.nabokovsg.laboratoryNK.model.norms.MeasuredParameter;
-import ru.nabokovsg.laboratoryNK.model.norms.TypeCalculation;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CalculationParameterMeasurementServiceImpl extends ConstParameterMeasurement
-                                                        implements CalculationParameterMeasurementService {
+        implements CalculationParameterMeasurementService {
 
     private final ParameterMeasurementMapper mapper;
+
     @Override
-    public Set<CalculationParameterMeasurement> calculationDefectOrRepair(TypeCalculation typeCalculation
-                                                    , Map<Long, CalculationParameterMeasurement> parameterMeasurements
-                                                    , List<ParameterMeasurementDto> parameterMeasurementsDto) {
-        Map<String, ParameterMeasurementDto> parametersDto = new HashMap<>();
-        parameterMeasurementsDto.forEach(p -> {
-            CalculationParameterMeasurement parameter = parameterMeasurements.get(p.getParameterId());
-            parametersDto.put(parameter.getParameterName(), p);
+    public Set<CalculationParameterMeasurement> calculation(CalculationParameterMeasurementBuilder builder) {
+        Map<Long, MeasuredParameter> measuredParameters = builder.getMeasuredParameters().stream().collect(Collectors.toMap(MeasuredParameter::getId, m -> m));
+        Set<CalculationParameterMeasurement> parameterMeasurements = builder.getParameterMeasurements();
+        if (builder.getParameterMeasurements() == null || builder.getParameterMeasurements().isEmpty()) {
+            parameterMeasurements = builder.getMeasuredParameters().stream().map(mapper::mapToNewParameterMeasurement).collect(Collectors.toSet());
+        }
+        log.info("1. Set<CalculationParameterMeasurement> parameterMeasurements = {}", parameterMeasurements);
+        Map<Long, ParameterMeasurementDto> parameterMeasurementDto = builder.getParameterMeasurementsDto().stream().collect(Collectors.toMap(ParameterMeasurementDto::getParameterId, p -> p));
+        Map<String, ParameterMeasurementDto> parametersDto = builder.getMeasuredParameters().stream().collect(Collectors.toMap(MeasuredParameter::getParameterName, m -> parameterMeasurementDto.get(m.getId())));
+        parameterMeasurements.forEach(p -> {
+            switch (measuredParameters.get(parametersDto.get(p.getParameterName()).getParameterId()).getTypeCalculation()) {
+                case MIN -> countMin(p, parametersDto.get(p.getParameterName()));
+                case MAX -> countMax(p, parametersDto.get(p.getParameterName()));
+                case MAX_MIN -> countMax(countMin(p, parametersDto.get(p.getParameterName())), parametersDto.get(p.getParameterName()));
+            }
         });
-        switch (typeCalculation) {
+        log.info("2. Set<CalculationParameterMeasurement> parameterMeasurements = {}", parameterMeasurements);
+        switch (builder.getTypeCalculation()) {
             case SQUARE -> {
-                return countSquare(parameterMeasurements, parametersDto);
+                return countSquare(measuredParameters, parameterMeasurements, builder.getParameterMeasurementsDto());
             }
             case QUANTITY -> {
-                return countQuantity(parameterMeasurements, parametersDto.get(getQuantity()));
+                return countQuantity(measuredParameters.values().stream().collect(Collectors.toMap(MeasuredParameter::getParameterName, m -> m)).get(getQuantity()), parameterMeasurements, builder.getParameterMeasurementsDto());
             }
             default -> {
-                return new HashSet<>();
+                return parameterMeasurements;
             }
         }
     }
 
-    @Override
-    public CalculationParameterMeasurement calculationParameterMeasurement(MeasuredParameter measuredParameter
-            , CalculationParameterMeasurement parameterMeasurement
-            , ParameterMeasurementDto parameterMeasurementDto) {
-        switch (measuredParameter.getTypeCalculation()) {
-            case MIN -> {
-                return countMin(parameterMeasurement, parameterMeasurementDto);
-            }
-            case MAX -> {
-                return countMax(parameterMeasurement, parameterMeasurementDto);
-            }
-            case MAX_MIN -> {
-                return countMaxAndMin(parameterMeasurement, parameterMeasurementDto);
-            }
-            case NO_ACTION -> {
-                return mapper.mapToParameterMeasurement(parameterMeasurementDto, measuredParameter);
-            }
-            default -> throw new NotFoundException(String.format("Unknown type=%s calculation parameters"
-                    , measuredParameter.getTypeCalculation()));
-        }
-    }
 
     private CalculationParameterMeasurement countMin(CalculationParameterMeasurement parameterMeasurement
-                                                  , ParameterMeasurementDto parameterMeasurementDto) {
+            , ParameterMeasurementDto parameterMeasurementDto) {
         if (parameterMeasurementDto.getValue() == null) {
             throw new NotFoundException(
                     String.format("To calculate the minimum" +
@@ -71,14 +63,14 @@ public class CalculationParameterMeasurementServiceImpl extends ConstParameterMe
             );
         }
         if (parameterMeasurement.getFirstValue() == null
-                                         || parameterMeasurementDto.getValue() > parameterMeasurement.getFirstValue()) {
+                || parameterMeasurementDto.getValue() > parameterMeasurement.getFirstValue()) {
             parameterMeasurement.setFirstValue(parameterMeasurementDto.getValue());
         }
         return parameterMeasurement;
     }
 
-    private CalculationParameterMeasurement countMax(CalculationParameterMeasurement parameterMeasurement
-                                                  , ParameterMeasurementDto parameterMeasurementDto) {
+    private void countMax(CalculationParameterMeasurement parameterMeasurement
+            , ParameterMeasurementDto parameterMeasurementDto) {
         if (parameterMeasurementDto.getValue() == null) {
             throw new NotFoundException(
                     String.format("To calculate the minimum" +
@@ -86,70 +78,63 @@ public class CalculationParameterMeasurementServiceImpl extends ConstParameterMe
             );
         }
         if (parameterMeasurement.getSecondValue() == null
-                                     || parameterMeasurement.getSecondValue() < parameterMeasurementDto.getValue()) {
+                || parameterMeasurement.getSecondValue() < parameterMeasurementDto.getValue()) {
             parameterMeasurement.setSecondValue(parameterMeasurementDto.getValue());
         }
-        return parameterMeasurement;
     }
 
-    private CalculationParameterMeasurement countMaxAndMin(CalculationParameterMeasurement parameterMeasurement
-                                                        , ParameterMeasurementDto parameterMeasurementDto) {
-        if (parameterMeasurementDto.getValue() == null) {
-            throw new NotFoundException(
-                    String.format("To calculate the minimum" +
-                            ", the measured value must not be zero, measurement=%s", parameterMeasurementDto.getValue())
-            );
-        }
-        if (parameterMeasurement.getSecondValue() == null
-                    || parameterMeasurement.getSecondValue() < parameterMeasurementDto.getValue()) {
-            parameterMeasurement.setSecondValue(parameterMeasurementDto.getValue());
+    private Set<CalculationParameterMeasurement>  countQuantity(MeasuredParameter measuredParameter, Set<CalculationParameterMeasurement> parameterMeasurements, List<ParameterMeasurementDto> parameterMeasurementsDto) {
+        log.info("START Quantity");
+        if (measuredParameter == null) {
+            double value = 1.0;
+            parameterMeasurements.forEach(v -> {
+                if (v.getParameterName().equals(getQuantity())) {
+                    v.setFirstValue(v.getFirstValue() + value);
+                } else {
+                    parameterMeasurements.add(mapper.mapToShortCalculationParameter(getQuantity(), value, getPieces()));
+                }
+            });
         } else {
-            parameterMeasurement.setFirstValue(parameterMeasurementDto.getValue());
+            ParameterMeasurementDto parameter = parameterMeasurementsDto.stream().collect(Collectors.toMap(ParameterMeasurementDto::getParameterId, p -> p)).get(measuredParameter.getId());
+            parameterMeasurements.forEach(v -> {
+                if (v.getParameterName().equals(getQuantity())) {
+                    v.setFirstValue(v.getFirstValue() + parameter.getValue());
+                } else {
+                    parameterMeasurements.add(mapper.mapToShortCalculationParameter(getQuantity(), parameter.getValue(), getPieces()));
+                }
+            });
         }
-        return parameterMeasurement;
+        log.info("3. Before Quantity parameterMeasurements = {}", parameterMeasurements);
+        log.info("END Quantity");
+        return parameterMeasurements;
     }
 
-    private Set<CalculationParameterMeasurement> countQuantity(
-                                                      Map<Long, CalculationParameterMeasurement> parameterMeasurements
-                                                    , ParameterMeasurementDto parameterDto) {
-        CalculationParameterMeasurement quantity = parameterMeasurements.get(parameterDto.getParameterId());
-        if (quantity == null) {
-            quantity = new CalculationParameterMeasurement(null, null, null, getQuantity(), null, null, getPieces(), null, null);
+    private Set<CalculationParameterMeasurement> countSquare(Map<Long, MeasuredParameter> measuredParameters, Set<CalculationParameterMeasurement> parameterMeasurements, List<ParameterMeasurementDto> parametersDto) {
+        CalculationParameterMeasurement parameterMeasurement = parameterMeasurements
+                .stream()
+                .collect(Collectors.toMap(CalculationParameterMeasurement::getParameterName, c -> c))
+                .get(getSquare());
+        Map<String, ParameterMeasurementDto> parameterMeasurementsDto = parametersDto.stream().collect(Collectors.toMap(p -> measuredParameters.get(p.getParameterId()).getParameterName(), p -> p));
+        CalculationParameterMeasurement square = mapper.mapToShortCalculationParameter(getSquare(), countSquareByLengthAndWidth(parameterMeasurementsDto), getPieces());
+        if (parameterMeasurementsDto.get(getDiameter()) != null && square.getFirstValue() == 0) {
+            square.setFirstValue(countSquareByDiameter(parameterMeasurementsDto.get(getDiameter()).getValue()));
         }
-        if (quantity.getFirstValue() == null && parameterDto.getValue() == null) {
-            quantity.setFirstValue(1.0);
-        } else {
-            if (parameterDto.getValue() != null) {
-                quantity.setFirstValue(quantity.getFirstValue() + parameterDto.getValue());
-            } else {
-                quantity.setFirstValue(quantity.getFirstValue() + 1.0);
-            }
-        }
-        parameterMeasurements.put(quantity.getId(), quantity);
-        return new HashSet<>(parameterMeasurements.values());
-    }
-
-    private Set<CalculationParameterMeasurement> countSquare(
-                                                      Map<Long, CalculationParameterMeasurement> parameterMeasurements
-                                                    , Map<String, ParameterMeasurementDto> parameterMeasurementsDto) {
-        CalculationParameterMeasurement parameterMeasurement
-                                = parameterMeasurements.get(parameterMeasurementsDto.get(getSquare()).getParameterId());
-        double square = countSquareByLengthAndWidth(parameterMeasurementsDto);
-        if (parameterMeasurementsDto.get(getDiameter()) != null && square == 0) {
-            square = countSquareByDiameter(parameterMeasurementsDto.get(getDiameter()).getValue());
-        }
-        if (square == 0) {
-            square = countSquareByLengthAndHeight(parameterMeasurementsDto);
+        if (square.getFirstValue() == 0) {
+            square.setFirstValue(countSquareByLengthAndHeight(parameterMeasurementsDto));
         }
         if (parameterMeasurement.getUnitMeasurement().equals(getM2())) {
-            square /= 1000000;
+            square.setFirstValue(square.getFirstValue() / 1000000);
         }
-        parameterMeasurement.setFirstValue(square);
-        parameterMeasurements.put(parameterMeasurement.getId(), parameterMeasurement);
-        if (Objects.equals(square, parameterMeasurement.getFirstValue())) {
-            return countQuantity(parameterMeasurements, parameterMeasurementsDto.get(getQuantity()));
+        for (CalculationParameterMeasurement parameter : parameterMeasurements) {
+            if (parameter.getParameterName().equals(getSquare())) {
+                if (Objects.equals(square.getFirstValue(), parameterMeasurement.getFirstValue())) {
+                    parameter.setFirstValue(parameter.getFirstValue() + 1.0);
+                } else {
+                    parameterMeasurements.add(square);
+                }
+            }
         }
-        return new HashSet<>(parameterMeasurements.values());
+        return parameterMeasurements;
     }
 
     private double countSquareByLengthAndWidth(Map<String, ParameterMeasurementDto> parameterMeasurementsDto) {
@@ -174,4 +159,4 @@ public class CalculationParameterMeasurementServiceImpl extends ConstParameterMe
         double rad = diameter / 2;
         return Math.PI * rad * rad * 100 / 100;
     }
- }
+}
