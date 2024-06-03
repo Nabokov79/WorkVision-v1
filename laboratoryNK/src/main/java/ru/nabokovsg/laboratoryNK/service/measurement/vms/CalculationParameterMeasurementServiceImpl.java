@@ -6,9 +6,10 @@ import org.springframework.stereotype.Service;
 import ru.nabokovsg.laboratoryNK.dto.measurement.vms.parameterMeasurement.ParameterMeasurementDto;
 import ru.nabokovsg.laboratoryNK.exceptions.NotFoundException;
 import ru.nabokovsg.laboratoryNK.mapper.measurement.vms.ParameterMeasurementMapper;
-import ru.nabokovsg.laboratoryNK.model.measurement.CalculationParameterMeasurementBuilder;
 import ru.nabokovsg.laboratoryNK.model.measurement.common.ConstParameterMeasurement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.CalculationParameterMeasurement;
+import ru.nabokovsg.laboratoryNK.model.measurement.vms.DefectMeasurement;
+import ru.nabokovsg.laboratoryNK.model.norms.Defect;
 import ru.nabokovsg.laboratoryNK.model.norms.MeasuredParameter;
 
 import java.util.*;
@@ -23,14 +24,14 @@ public class CalculationParameterMeasurementServiceImpl extends ConstParameterMe
     private final ParameterMeasurementMapper mapper;
 
     @Override
-    public Set<CalculationParameterMeasurement> calculation(CalculationParameterMeasurementBuilder builder) {
-        Map<Long, MeasuredParameter> measuredParameters = builder.getMeasuredParameters().stream().collect(Collectors.toMap(MeasuredParameter::getId, m -> m));
-        Set<CalculationParameterMeasurement> parameterMeasurements = builder.getParameterMeasurements();
-        if (builder.getParameterMeasurements() == null || builder.getParameterMeasurements().isEmpty()) {
-            parameterMeasurements = builder.getMeasuredParameters().stream().map(mapper::mapToNewParameterMeasurement).collect(Collectors.toSet());
+    public Set<CalculationParameterMeasurement> calculation(Defect defect, DefectMeasurement defectMeasurement, List<ParameterMeasurementDto> parameterMeasurementsDto) {
+        Map<Long, MeasuredParameter> measuredParameters = defect.getMeasuredParameters().stream().collect(Collectors.toMap(MeasuredParameter::getId, m -> m));
+        Set<CalculationParameterMeasurement> parameterMeasurements = defectMeasurement.getParameterMeasurements();
+        if (defectMeasurement.getParameterMeasurements() == null || defectMeasurement.getParameterMeasurements().isEmpty()) {
+            parameterMeasurements = defect.getMeasuredParameters().stream().map(mapper::mapToNewParameterMeasurement).collect(Collectors.toSet());
         }
-        Map<Long, ParameterMeasurementDto> parameterMeasurementDto = builder.getParameterMeasurementsDto().stream().collect(Collectors.toMap(ParameterMeasurementDto::getParameterId, p -> p));
-        Map<String, ParameterMeasurementDto> parametersDto = builder.getMeasuredParameters().stream().collect(Collectors.toMap(MeasuredParameter::getParameterName, m -> parameterMeasurementDto.get(m.getId())));
+        Map<Long, ParameterMeasurementDto> parameterMeasurementDto = parameterMeasurementsDto.stream().collect(Collectors.toMap(ParameterMeasurementDto::getParameterId, p -> p));
+        Map<String, ParameterMeasurementDto> parametersDto = defect.getMeasuredParameters().stream().collect(Collectors.toMap(MeasuredParameter::getParameterName, m -> parameterMeasurementDto.get(m.getId())));
         parameterMeasurements.forEach(p -> {
             if (parametersDto.get(p.getParameterName()) != null) {
                 switch (measuredParameters.get(parametersDto.get(p.getParameterName()).getParameterId()).getTypeCalculation()) {
@@ -40,12 +41,12 @@ public class CalculationParameterMeasurementServiceImpl extends ConstParameterMe
                 }
             }
         });
-        switch (builder.getTypeCalculation()) {
+        switch (defect.getTypeCalculation()) {
             case SQUARE -> {
-                return countSquare(measuredParameters, parameterMeasurements, builder.getParameterMeasurementsDto());
+                return countSquare(measuredParameters, parameterMeasurements, parameterMeasurementsDto);
             }
             case QUANTITY -> {
-                return countQuantity(measuredParameters.values().stream().collect(Collectors.toMap(MeasuredParameter::getParameterName, m -> m)).get(getQuantity()), parameterMeasurements, builder.getParameterMeasurementsDto());
+                return countQuantity(measuredParameters.values().stream().collect(Collectors.toMap(MeasuredParameter::getParameterName, m -> m)).get(getQuantity()), parameterMeasurements, parameterMeasurementsDto);
             }
             default -> {
                 return parameterMeasurements;

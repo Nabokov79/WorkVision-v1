@@ -3,11 +3,14 @@ package ru.nabokovsg.laboratoryNK.service.measurement.vms;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.nabokovsg.laboratoryNK.exceptions.BadRequestException;
+import ru.nabokovsg.laboratoryNK.dto.measurement.vms.parameterMeasurement.ParameterMeasurementDto;
 import ru.nabokovsg.laboratoryNK.mapper.measurement.vms.ParameterMeasurementMapper;
-import ru.nabokovsg.laboratoryNK.model.measurement.CalculationParameterMeasurementBuilder;
 import ru.nabokovsg.laboratoryNK.model.measurement.common.ConstParameterMeasurement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.CalculationParameterMeasurement;
+import ru.nabokovsg.laboratoryNK.model.measurement.vms.CompletedRepairElement;
+import ru.nabokovsg.laboratoryNK.model.measurement.vms.DefectMeasurement;
+import ru.nabokovsg.laboratoryNK.model.norms.Defect;
+import ru.nabokovsg.laboratoryNK.model.norms.ElementRepair;
 import ru.nabokovsg.laboratoryNK.repository.measurement.vms.ParameterMeasurementServiceRepository;
 
 import java.util.*;
@@ -23,32 +26,22 @@ public class ParameterMeasurementServiceImpl extends ConstParameterMeasurement i
     private final CalculationParameterMeasurementService calculationService;
 
     @Override
-    public Set<CalculationParameterMeasurement> save(CalculationParameterMeasurementBuilder builder) {
-        Set<CalculationParameterMeasurement> calculations;
-        if (builder.getDefect() != null) {
-            calculations = setNumbers(builder)
-                    .stream()
-                    .map(p -> mapper.mapWithDefectMeasurement(p, builder.getDefect()))
-                    .collect(Collectors.toSet());
-        } else if (builder.getRepair() != null) {
-            calculations = setNumbers(builder)
-                    .stream()
-                    .map(p -> mapper.mapWithCompletedRepairElement(p, builder.getRepair()))
-                    .collect(Collectors.toSet());
-        } else {
-            throw new BadRequestException(
-                    String.format("DefectMeasurement=%s and CompletedRepairElement=%s should not be null"
-                            , builder.getDefect(), builder.getRepair()));
-        }
+    public Set<CalculationParameterMeasurement> saveDefectMeasurement(Defect defect, DefectMeasurement defectMeasurement, List<ParameterMeasurementDto> parameterMeasurementsDto) {
+        Set<CalculationParameterMeasurement> calculations = calculationService.calculation(defect, defectMeasurement, parameterMeasurementsDto).stream().map(p -> mapper.mapWithDefectMeasurement(p, defectMeasurement)).collect(Collectors.toSet());
+        setNumbers(calculations);
         return new HashSet<>(repository.saveAll(calculations));
     }
 
-    private Set<CalculationParameterMeasurement> setNumbers(CalculationParameterMeasurementBuilder builder) {
-        Set<CalculationParameterMeasurement> calculations = calculationService.calculation(builder);
+    @Override
+    public Set<CalculationParameterMeasurement> saveCompletedRepairElement(ElementRepair elementRepair, CompletedRepairElement repair, List<ParameterMeasurementDto> parameterMeasurementsDto) {
+        return null;
+    }
+
+    private void setNumbers(Set<CalculationParameterMeasurement> parameterMeasurements) {
         int sequentialNumber = 1;
         int number = 1;
-        int size = calculations.size();
-        for (CalculationParameterMeasurement measurement : calculations) {
+        int size = parameterMeasurements.size();
+        for (CalculationParameterMeasurement measurement : parameterMeasurements) {
             if (measurement.getNumber() == null) {
                 measurement.setNumber(number);
                 if (measurement.getParameterName().equals(getQuantity())) {
@@ -61,6 +54,5 @@ public class ParameterMeasurementServiceImpl extends ConstParameterMeasurement i
                 }
             }
         }
-        return calculations;
     }
 }

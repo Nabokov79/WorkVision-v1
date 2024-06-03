@@ -12,7 +12,6 @@ import ru.nabokovsg.laboratoryNK.exceptions.NotFoundException;
 import ru.nabokovsg.laboratoryNK.mapper.measurement.vms.DefectMeasurementMapper;
 import ru.nabokovsg.laboratoryNK.model.equipmentDiagnosed.EquipmentElement;
 import ru.nabokovsg.laboratoryNK.model.equipmentDiagnosed.PartElement;
-import ru.nabokovsg.laboratoryNK.model.measurement.CalculationParameterMeasurementBuilder;
 import ru.nabokovsg.laboratoryNK.model.measurement.utm.UltrasonicThicknessMeasurement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.DefectMeasurement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.QCalculationParameterMeasurement;
@@ -54,14 +53,7 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
             }
             measurement = repository.save(measurement);
         }
-        measurement.setParameterMeasurements(parameterMeasurementService.save(
-               new CalculationParameterMeasurementBuilder.Builder()
-                                                    .defect(measurement)
-                                                    .typeCalculation(defect.getTypeCalculation())
-                                                    .measuredParameters(defect.getMeasuredParameters())
-                                                    .parameterMeasurements(measurement.getParameterMeasurements())
-                                                    .parameterMeasurementsDto(measurementDto.getParameterMeasurements())
-                                                    .build()));
+        measurement.setParameterMeasurements(parameterMeasurementService.saveDefectMeasurement(defect, measurement, measurementDto.getParameterMeasurements()));
         return mapper.mapToResponseDefectMeasurementDto(measurement);
     }
 
@@ -77,13 +69,7 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
                 measurement = mapper.mapWithPartElement(measurement, partsElement.get(measurementDto.getPartElementId()));
             }
             DefectMeasurement defectMeasurement = repository.save(measurement);
-            measurement.getParameterMeasurements().addAll(parameterMeasurementService.save(
-                    new CalculationParameterMeasurementBuilder.Builder()
-                            .defect(measurement)
-                            .typeCalculation(defect.getTypeCalculation())
-                            .measuredParameters(defect.getMeasuredParameters())
-                            .parameterMeasurementsDto(measurementDto.getParameterMeasurements())
-                            .build()));
+            measurement.setParameterMeasurements(parameterMeasurementService.saveDefectMeasurement(defect, measurement, measurementDto.getParameterMeasurements()));
             return mapper.mapToResponseDefectMeasurementDto(defectMeasurement);
         }
         throw new NotFoundException(
