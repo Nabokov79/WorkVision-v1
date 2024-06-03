@@ -29,10 +29,10 @@ public class CalculationParameterMeasurement {
     private Double secondValue;
     @Column(name = "unit_measurement")
     private String unitMeasurement;
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "defect_measurement_id",  nullable = false)
     private DefectMeasurement defectMeasurement;
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "completed_repair_id",  nullable = false)
     private CompletedRepairElement completedRepairElement;
 
@@ -46,8 +46,6 @@ public class CalculationParameterMeasurement {
                 ", firstValue=" + firstValue +
                 ", secondValue=" + secondValue +
                 ", unitMeasurement='" + unitMeasurement + '\'' +
-                ", defectMeasurement=" + defectMeasurement +
-                ", completedRepairElement=" + completedRepairElement +
                 '}';
     }
 }

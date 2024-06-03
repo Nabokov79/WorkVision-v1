@@ -4,6 +4,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.nabokovsg.laboratoryNK.dto.measurement.vms.defectMeasurement.DefectMeasurementDto;
 import ru.nabokovsg.laboratoryNK.dto.measurement.vms.defectMeasurement.ResponseDefectMeasurementDto;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DefectMeasurementServiceImpl implements DefectMeasurementService {
 
     private final DefectMeasurementRepository repository;
@@ -40,6 +42,7 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
     @Override
     public ResponseDefectMeasurementDto save(DefectMeasurementDto measurementDto) {
         DefectMeasurement measurement = getByPredicate(measurementDto);
+        log.info("DefectMeasurement measurement = {}", measurement);
         Defect defect = defectsService.getById(measurementDto.getDefectId());
         if (measurement == null) {
             EquipmentElement element = equipmentElementService.getById(measurementDto.getElementId());

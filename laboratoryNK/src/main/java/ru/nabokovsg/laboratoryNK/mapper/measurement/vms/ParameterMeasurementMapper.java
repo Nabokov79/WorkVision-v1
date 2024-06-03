@@ -32,10 +32,12 @@ public interface ParameterMeasurementMapper {
     CalculationParameterMeasurement mapToNewParameterMeasurement(MeasuredParameter measuredParameter);
 
     @Mapping(source = "defect", target = "defectMeasurement")
+    @Mapping(target = "id", ignore = true)
     CalculationParameterMeasurement mapWithDefectMeasurement(@MappingTarget CalculationParameterMeasurement parameter
                                                                           , DefectMeasurement defect);
 
     @Mapping(source = "repair", target = "completedRepairElement")
+    @Mapping(target = "id", ignore = true)
     CalculationParameterMeasurement mapWithCompletedRepairElement(
                                @MappingTarget CalculationParameterMeasurement parameter, CompletedRepairElement repair);
 

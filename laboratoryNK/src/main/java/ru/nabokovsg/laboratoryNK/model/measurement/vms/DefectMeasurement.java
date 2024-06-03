@@ -39,6 +39,24 @@ public class DefectMeasurement {
     private Boolean notMeetRequirements;
     @Column(name = "use_calculate_thickness")
     private Boolean useCalculateThickness;
-    @OneToMany(mappedBy = "defectMeasurement", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "defectMeasurement")
     private Set<CalculationParameterMeasurement> parameterMeasurements;
+
+    @Override
+    public String toString() {
+        return "DefectMeasurement{" +
+                "id=" + id +
+                ", surveyJournalId=" + surveyJournalId +
+                ", equipmentId=" + equipmentId +
+                ", elementId=" + elementId +
+                ", elementName='" + elementName + '\'' +
+                ", partElementId=" + partElementId +
+                ", partName='" + partName + '\'' +
+                ", defectId=" + defectId +
+                ", defectName='" + defectName + '\'' +
+                ", notMeetRequirements=" + notMeetRequirements +
+                ", useCalculateThickness=" + useCalculateThickness +
+                ", parameterMeasurements=" + parameterMeasurements +
+                '}';
+    }
 }

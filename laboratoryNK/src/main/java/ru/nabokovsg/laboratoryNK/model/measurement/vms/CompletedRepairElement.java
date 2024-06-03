@@ -35,6 +35,6 @@ public class CompletedRepairElement {
     private Long repairId;
     @Column(name = "repair_name")
     private String repairName;
-    @OneToMany(mappedBy = "completedRepairElement", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "completedRepairElement")
     private Set<CalculationParameterMeasurement> parameterMeasurements;
 }

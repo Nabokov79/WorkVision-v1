@@ -29,17 +29,17 @@ public class CalculationParameterMeasurementServiceImpl extends ConstParameterMe
         if (builder.getParameterMeasurements() == null || builder.getParameterMeasurements().isEmpty()) {
             parameterMeasurements = builder.getMeasuredParameters().stream().map(mapper::mapToNewParameterMeasurement).collect(Collectors.toSet());
         }
-        log.info("1. Set<CalculationParameterMeasurement> parameterMeasurements = {}", parameterMeasurements);
         Map<Long, ParameterMeasurementDto> parameterMeasurementDto = builder.getParameterMeasurementsDto().stream().collect(Collectors.toMap(ParameterMeasurementDto::getParameterId, p -> p));
         Map<String, ParameterMeasurementDto> parametersDto = builder.getMeasuredParameters().stream().collect(Collectors.toMap(MeasuredParameter::getParameterName, m -> parameterMeasurementDto.get(m.getId())));
         parameterMeasurements.forEach(p -> {
-            switch (measuredParameters.get(parametersDto.get(p.getParameterName()).getParameterId()).getTypeCalculation()) {
-                case MIN -> countMin(p, parametersDto.get(p.getParameterName()));
-                case MAX -> countMax(p, parametersDto.get(p.getParameterName()));
-                case MAX_MIN -> countMax(countMin(p, parametersDto.get(p.getParameterName())), parametersDto.get(p.getParameterName()));
+            if (parametersDto.get(p.getParameterName()) != null) {
+                switch (measuredParameters.get(parametersDto.get(p.getParameterName()).getParameterId()).getTypeCalculation()) {
+                    case MIN -> countMin(p, parametersDto.get(p.getParameterName()));
+                    case MAX -> countMax(p, parametersDto.get(p.getParameterName()));
+                    case MAX_MIN -> countMax(countMin(p, parametersDto.get(p.getParameterName())), parametersDto.get(p.getParameterName()));
+                }
             }
         });
-        log.info("2. Set<CalculationParameterMeasurement> parameterMeasurements = {}", parameterMeasurements);
         switch (builder.getTypeCalculation()) {
             case SQUARE -> {
                 return countSquare(measuredParameters, parameterMeasurements, builder.getParameterMeasurementsDto());
@@ -83,29 +83,28 @@ public class CalculationParameterMeasurementServiceImpl extends ConstParameterMe
         }
     }
 
-    private Set<CalculationParameterMeasurement>  countQuantity(MeasuredParameter measuredParameter, Set<CalculationParameterMeasurement> parameterMeasurements, List<ParameterMeasurementDto> parameterMeasurementsDto) {
-        log.info("START Quantity");
-        if (measuredParameter == null) {
-            double value = 1.0;
-            parameterMeasurements.forEach(v -> {
-                if (v.getParameterName().equals(getQuantity())) {
-                    v.setFirstValue(v.getFirstValue() + value);
-                } else {
-                    parameterMeasurements.add(mapper.mapToShortCalculationParameter(getQuantity(), value, getPieces()));
-                }
-            });
-        } else {
-            ParameterMeasurementDto parameter = parameterMeasurementsDto.stream().collect(Collectors.toMap(ParameterMeasurementDto::getParameterId, p -> p)).get(measuredParameter.getId());
-            parameterMeasurements.forEach(v -> {
-                if (v.getParameterName().equals(getQuantity())) {
-                    v.setFirstValue(v.getFirstValue() + parameter.getValue());
-                } else {
-                    parameterMeasurements.add(mapper.mapToShortCalculationParameter(getQuantity(), parameter.getValue(), getPieces()));
-                }
-            });
+    private Set<CalculationParameterMeasurement> countQuantity(MeasuredParameter measuredParameter, Set<CalculationParameterMeasurement> parameterMeasurements, List<ParameterMeasurementDto> parameterMeasurementsDto) {
+        double value = 1.0;
+        boolean flag = true;
+        if (measuredParameter != null) {
+            value = parameterMeasurementsDto.stream()
+                                            .collect(Collectors.toMap(ParameterMeasurementDto::getParameterId, p -> p))
+                                            .get(measuredParameter.getId())
+                                            .getValue();
         }
-        log.info("3. Before Quantity parameterMeasurements = {}", parameterMeasurements);
-        log.info("END Quantity");
+        for (CalculationParameterMeasurement parameter : parameterMeasurements) {
+            if (parameter.getParameterName().equals(getQuantity())) {
+                if (parameter.getFirstValue() == null) {
+                    parameter.setFirstValue(value);
+                } else {
+                    parameter.setFirstValue(parameter.getFirstValue() + value);
+                }
+                flag = false;
+            }
+            if (flag){
+                parameterMeasurements.add(mapper.mapToShortCalculationParameter(getQuantity(), value, getPieces()));
+            }
+        }
         return parameterMeasurements;
     }
 

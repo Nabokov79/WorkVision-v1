@@ -11,6 +11,7 @@ import ru.nabokovsg.laboratoryNK.model.measurement.vms.CalculationParameterMeasu
 import ru.nabokovsg.laboratoryNK.repository.measurement.vms.ParameterMeasurementServiceRepository;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,27 +24,27 @@ public class ParameterMeasurementServiceImpl extends ConstParameterMeasurement i
 
     @Override
     public Set<CalculationParameterMeasurement> save(CalculationParameterMeasurementBuilder builder) {
+        Set<CalculationParameterMeasurement> calculations;
         if (builder.getDefect() != null) {
-            return new HashSet<>(repository.saveAll(setNumbers(builder)
+            calculations = setNumbers(builder)
                     .stream()
                     .map(p -> mapper.mapWithDefectMeasurement(p, builder.getDefect()))
-                    .toList()));
-        }
-        if (builder.getRepair() != null) {
-            return new HashSet<>(repository.saveAll(setNumbers(builder)
+                    .collect(Collectors.toSet());
+        } else if (builder.getRepair() != null) {
+            calculations = setNumbers(builder)
                     .stream()
-                    .map(p ->  mapper.mapWithCompletedRepairElement(p, builder.getRepair()))
-                    .toList()));
+                    .map(p -> mapper.mapWithCompletedRepairElement(p, builder.getRepair()))
+                    .collect(Collectors.toSet());
+        } else {
+            throw new BadRequestException(
+                    String.format("DefectMeasurement=%s and CompletedRepairElement=%s should not be null"
+                            , builder.getDefect(), builder.getRepair()));
         }
-        throw new BadRequestException(
-                String.format("DefectMeasurement=%s and CompletedRepairElement=%s should not be null"
-                                                                           , builder.getDefect(), builder.getRepair()));
+        return new HashSet<>(repository.saveAll(calculations));
     }
 
     private Set<CalculationParameterMeasurement> setNumbers(CalculationParameterMeasurementBuilder builder) {
-        log.info("START Calculation");
         Set<CalculationParameterMeasurement> calculations = calculationService.calculation(builder);
-        log.info("END Calculation");
         int sequentialNumber = 1;
         int number = 1;
         int size = calculations.size();
@@ -60,7 +61,6 @@ public class ParameterMeasurementServiceImpl extends ConstParameterMeasurement i
                 }
             }
         }
-        log.info("4. Before set numbers calculations = {}", calculations);
         return calculations;
     }
 }
