@@ -7,6 +7,7 @@ import ru.nabokovsg.laboratoryNK.model.measurement.vms.DefectMeasurement;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface CellFactoryService {
 
@@ -26,9 +27,9 @@ public interface CellFactoryService {
 
     CellTable createPartElementCell(Map<String, Integer> columnHeaders, int stringSequentialNumber, String cellValue, DocumentTable table);
 
-    List<CellTable> createDefectCell(Map<String, Integer> columnHeaders, List<DefectMeasurement> defects, int stringSequentialNumber, DocumentTable table);
+    List<CellTable> createDefectCell(Map<String, Integer> columnHeaders, Set<DefectMeasurement> defects, int stringSequentialNumber, DocumentTable table);
 
-    List<CellTable> createRepairElementCell(Map<String, Integer> columnHeaders, List<CompletedRepairElement> repairElements, int stringSequentialNumber, DocumentTable table);
+    List<CellTable> createRepairElementCell(Map<String, Integer> columnHeaders, Set<CompletedRepairElement> repairElements, int stringSequentialNumber, DocumentTable table);
 
     CellTable createVisualInspectionCell(Map<String, Integer> columnHeaders, int stringSequentialNumber, String cellValue, DocumentTable table);
 

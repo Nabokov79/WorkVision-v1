@@ -10,21 +10,18 @@ import ru.nabokovsg.laboratoryNK.dto.measurement.vms.defectMeasurement.DefectMea
 import ru.nabokovsg.laboratoryNK.dto.measurement.vms.defectMeasurement.ResponseDefectMeasurementDto;
 import ru.nabokovsg.laboratoryNK.exceptions.NotFoundException;
 import ru.nabokovsg.laboratoryNK.mapper.measurement.vms.DefectMeasurementMapper;
-import ru.nabokovsg.laboratoryNK.model.equipmentDiagnosed.EquipmentElement;
-import ru.nabokovsg.laboratoryNK.model.equipmentDiagnosed.PartElement;
 import ru.nabokovsg.laboratoryNK.model.measurement.utm.UltrasonicThicknessMeasurement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.DefectMeasurement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.QCalculationParameterMeasurement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.QDefectMeasurement;
+import ru.nabokovsg.laboratoryNK.model.measurement.vms.QVMSurvey;
 import ru.nabokovsg.laboratoryNK.model.norms.Defect;
 import ru.nabokovsg.laboratoryNK.repository.measurement.vms.DefectMeasurementRepository;
-import ru.nabokovsg.laboratoryNK.service.equipmentDiagnosed.EquipmentElementService;
 import ru.nabokovsg.laboratoryNK.service.norms.DefectService;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,24 +33,20 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
     private final ParameterMeasurementService parameterMeasurementService;
     private final EntityManager em;
     private final DefectService defectsService;
-    private final EquipmentElementService equipmentElementService;
+    private final VMSurveyService vmSurveyService;
 
     @Override
     public ResponseDefectMeasurementDto save(DefectMeasurementDto measurementDto) {
         DefectMeasurement measurement = getByPredicate(measurementDto);
-        log.info("DefectMeasurement measurement = {}", measurement);
         Defect defect = defectsService.getById(measurementDto.getDefectId());
+        log.info("DefectMeasurement measurement = {}", measurement);
         if (measurement == null) {
-            EquipmentElement element = equipmentElementService.getById(measurementDto.getElementId());
-            measurement = mapper.mapWithEquipmentElement(measurementDto, defect, element);
-            if(measurementDto.getPartElementId() != null) {
-                Map<Long, PartElement> partsElement = element.getPartsElement()
-                        .stream().collect(Collectors.toMap(PartElement::getId, p -> p));
-                measurement = mapper.mapWithPartElement(measurement, partsElement.get(measurementDto.getPartElementId()));
-            }
-            measurement = repository.save(measurement);
+            measurement = repository.save(mapper.mapWithEquipmentElement(measurementDto, defect
+                    , vmSurveyService.save(measurementDto.getSurveyJournalId(), measurementDto.getEquipmentId()
+                                         , measurementDto.getElementId(), measurementDto.getPartElementId())));
         }
         measurement.setParameterMeasurements(parameterMeasurementService.saveDefectMeasurement(defect, measurement, measurementDto.getParameterMeasurements()));
+        log.info("-----------------------------END-------------------------------------");
         return mapper.mapToResponseDefectMeasurementDto(measurement);
     }
 
@@ -61,16 +54,11 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
     public ResponseDefectMeasurementDto update(DefectMeasurementDto measurementDto) {
         if (repository.existsById(measurementDto.getId())) {
             Defect defect = defectsService.getById(measurementDto.getDefectId());
-            EquipmentElement element = equipmentElementService.getById(measurementDto.getElementId());
-            Map<Long, PartElement> partsElement = element.getPartsElement()
-                    .stream().collect(Collectors.toMap(PartElement::getId, p -> p));
-            DefectMeasurement measurement = mapper.mapWithEquipmentElement(measurementDto, defect, element);
-            if(measurementDto.getPartElementId() != null) {
-                measurement = mapper.mapWithPartElement(measurement, partsElement.get(measurementDto.getPartElementId()));
-            }
-            DefectMeasurement defectMeasurement = repository.save(measurement);
+            DefectMeasurement measurement = repository.save(mapper.mapWithEquipmentElement(measurementDto, defect
+                    , vmSurveyService.save(measurementDto.getSurveyJournalId(), measurementDto.getEquipmentId()
+                            , measurementDto.getElementId(), measurementDto.getPartElementId())));
             measurement.setParameterMeasurements(parameterMeasurementService.saveDefectMeasurement(defect, measurement, measurementDto.getParameterMeasurements()));
-            return mapper.mapToResponseDefectMeasurementDto(defectMeasurement);
+            return mapper.mapToResponseDefectMeasurementDto(measurement);
         }
         throw new NotFoundException(
                 String.format("DefectMeasurement with id=%s not found for update", measurementDto.getId()));
@@ -78,15 +66,30 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
 
     @Override
     public List<ResponseDefectMeasurementDto> getAll(Long id) {
-        return repository.findAllBySurveyJournalId(id)
-                         .stream()
-                         .map(mapper::mapToResponseDefectMeasurementDto)
-                         .toList();
+        QDefectMeasurement defect = QDefectMeasurement.defectMeasurement;
+        QVMSurvey vm = QVMSurvey.vMSurvey;
+        BooleanBuilder booleanBuilder = new BooleanBuilder();
+        booleanBuilder.and(vm.surveyJournalId.eq(id));
+        return new JPAQueryFactory(em).from(defect)
+                                      .select(defect)
+                                      .where(booleanBuilder)
+                                      .fetch()
+                                      .stream()
+                                      .map(mapper::mapToResponseDefectMeasurementDto)
+                                      .toList();
     }
 
     @Override
     public Set<DefectMeasurement> getAllByIds(Long surveyJournalId, Long equipmentId) {
-        Set<DefectMeasurement> measurements = repository.findAllBySurveyJournalIdAndEquipmentId(surveyJournalId, equipmentId);
+        QDefectMeasurement defect = QDefectMeasurement.defectMeasurement;
+        QVMSurvey vm = QVMSurvey.vMSurvey;
+        BooleanBuilder booleanBuilder = new BooleanBuilder();
+        booleanBuilder.and(vm.surveyJournalId.eq(surveyJournalId));
+        booleanBuilder.and(vm.equipmentId.eq(equipmentId));
+        Set<DefectMeasurement> measurements = new HashSet<>(new JPAQueryFactory(em).from(defect)
+                                                                                    .select(defect)
+                                                                                    .where(booleanBuilder)
+                                                                                    .fetch());
         if (measurements.isEmpty()) {
             throw new NotFoundException(
                     String.format("DefectMeasurement with surveyJournalId=%s and surveyJournalId=%s not found"
@@ -106,15 +109,16 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
 
     @Override
     public Double getMaxCorrosionValueByPredicate(UltrasonicThicknessMeasurement measurement) {
+        QVMSurvey vm = QVMSurvey.vMSurvey;
         QDefectMeasurement defect = QDefectMeasurement.defectMeasurement;
         QCalculationParameterMeasurement parameter = QCalculationParameterMeasurement.calculationParameterMeasurement;
         BooleanBuilder booleanBuilder = new BooleanBuilder();
-        booleanBuilder.and(defect.surveyJournalId.eq(measurement.getSurveyJournalId()));
-        booleanBuilder.and(defect.equipmentId.eq(measurement.getEquipmentId()));
-        booleanBuilder.and(defect.elementId.eq(measurement.getElementId()));
+        booleanBuilder.and(vm.surveyJournalId.eq(measurement.getSurveyJournalId()));
+        booleanBuilder.and(vm.equipmentId.eq(measurement.getEquipmentId()));
+        booleanBuilder.and(vm.elementId.eq(measurement.getElementId()));
         booleanBuilder.and(defect.useCalculateThickness.eq(true));
         if (measurement.getPartElementId() != null) {
-            booleanBuilder.and(defect.partElementId.eq(measurement.getPartElementId()));
+            booleanBuilder.and(vm.partElementId.eq(measurement.getPartElementId()));
         }
         booleanBuilder.and(parameter.defectMeasurement.id.eq(defect.id));
         Double corrosion = new JPAQueryFactory(em).from(parameter)
@@ -129,17 +133,19 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
 
     private DefectMeasurement getByPredicate(DefectMeasurementDto defectMeasurementDto) {
         QDefectMeasurement defect = QDefectMeasurement.defectMeasurement;
+        QVMSurvey vm = QVMSurvey.vMSurvey;
         BooleanBuilder booleanBuilder = new BooleanBuilder();
-        booleanBuilder.and(defect.surveyJournalId.eq(defectMeasurementDto.getSurveyJournalId()));
-        booleanBuilder.and(defect.equipmentId.eq(defectMeasurementDto.getEquipmentId()));
-        booleanBuilder.and(defect.elementId.eq(defectMeasurementDto.getElementId()));
-        if (defectMeasurementDto.getPartElementId() != null && defectMeasurementDto.getPartElementId() > 0) {
-            booleanBuilder.and(defect.partElementId.eq(defectMeasurementDto.getPartElementId()));
-        }
+        booleanBuilder.and(vm.id.eq(defect.vmSurvey.id));
         booleanBuilder.and(defect.defectId.eq(defectMeasurementDto.getDefectId()));
+        booleanBuilder.and(vm.surveyJournalId.eq(defectMeasurementDto.getSurveyJournalId()));
+        booleanBuilder.and(vm.equipmentId.eq(defectMeasurementDto.getEquipmentId()));
+        booleanBuilder.and(vm.elementId.eq(defectMeasurementDto.getElementId()));
+        if (defectMeasurementDto.getPartElementId() != null && defectMeasurementDto.getPartElementId() > 0) {
+            booleanBuilder.and(vm.partElementId.eq(defectMeasurementDto.getPartElementId()));
+        }
         return new JPAQueryFactory(em).from(defect)
-                .select(defect)
-                .where(booleanBuilder)
-                .fetchOne();
+                                      .select(defect)
+                                      .where(booleanBuilder)
+                                      .fetchOne();
     }
 }

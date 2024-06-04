@@ -11,8 +11,6 @@ import ru.nabokovsg.laboratoryNK.dto.measurement.vms.visualInspection.ResponseVi
 import ru.nabokovsg.laboratoryNK.dto.measurement.vms.visualInspection.VisualInspectionDto;
 import ru.nabokovsg.laboratoryNK.service.measurement.vms.VisualInspectionService;
 
-import java.util.List;
-
 @RestController
 @RequestMapping(
         value = "/measurement/visual/inspection",
@@ -39,19 +37,5 @@ public class VisualInspectionController {
                                                               @Parameter(name = "Данные визуального осмотра")
                                                               VisualInspectionDto inspectionDto) {
         return ResponseEntity.ok().body(service.update(inspectionDto));
-    }
-
-    @Operation(summary = "Получить данные визуального осмотра элементов оборудования")
-    @GetMapping("/{id}")
-    public ResponseEntity<List<ResponseVisualInspectionDto>> getAll(
-            @PathVariable @Parameter(name = "Индентификатор записи в журнале задач") Long id) {
-        return ResponseEntity.ok().body(service.getAll(id));
-    }
-
-    @Operation(summary = "Удалить данные визуального осмотра")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable @Parameter(name = "Индентификатор") Long id) {
-        service.delete(id);
-        return ResponseEntity.ok("Данные визуального осмотра успешно удалены.");
     }
 }

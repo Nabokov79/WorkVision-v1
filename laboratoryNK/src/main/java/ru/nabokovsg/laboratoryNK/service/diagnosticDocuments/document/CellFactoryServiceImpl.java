@@ -61,15 +61,12 @@ public class CellFactoryServiceImpl implements CellFactoryService {
     }
 
     @Override
-    public List<CellTable> createDefectCell(Map<String, Integer> columnHeaders, List<DefectMeasurement> defects, int stringSequentialNumber, DocumentTable table) {
+    public List<CellTable> createDefectCell(Map<String, Integer> columnHeaders, Set<DefectMeasurement> defects, int stringSequentialNumber, DocumentTable table) {
         List<CellTable> cells = new ArrayList<>();
         if (defects != null) {
             for(DefectMeasurement defect : defects) {
                 cells.add(mapper.mapToCellTable(columnHeaders.get(String.valueOf(ColumnHeaderType.DEFECTS)), stringSequentialNumber, String.join("", defect.getDefectName(), ":"), table));
                 stringSequentialNumber += 1;
-                if (defect.getPartName() != null) {
-                    cells.add(mapper.mapToCellTable(columnHeaders.get(String.valueOf(ColumnHeaderType.DEFECTS)), stringSequentialNumber, String.join("", defect.getPartName(), ":"), table));
-                }
                 cells.addAll(createCalculationParameter(columnHeaders.get(String.valueOf(ColumnHeaderType.DEFECTS)), defect.getParameterMeasurements(), stringSequentialNumber, table));
             }
         } else {
@@ -103,15 +100,12 @@ public class CellFactoryServiceImpl implements CellFactoryService {
     }
 
     @Override
-    public List<CellTable> createRepairElementCell(Map<String, Integer> columnHeaders, List<CompletedRepairElement> repairElements, int stringSequentialNumber, DocumentTable table) {
+    public List<CellTable> createRepairElementCell(Map<String, Integer> columnHeaders, Set<CompletedRepairElement> repairElements, int stringSequentialNumber, DocumentTable table) {
         List<CellTable> cells = new ArrayList<>();
         if (repairElements != null) {
             for(CompletedRepairElement repair : repairElements) {
                 cells.add(mapper.mapToCellTable(columnHeaders.get(String.valueOf(ColumnHeaderType.REPAIR_ELEMENT)), stringSequentialNumber, String.join("", repair.getRepairName(), ":"), table));
                 stringSequentialNumber += 1;
-                if (repair.getPartName() != null) {
-                    cells.add(mapper.mapToCellTable(columnHeaders.get(String.valueOf(ColumnHeaderType.REPAIR_ELEMENT)), stringSequentialNumber, String.join("", repair.getRepairName(), ":"), table));
-                }
                 cells.addAll(createCalculationParameter(columnHeaders.get(String.valueOf(ColumnHeaderType.REPAIR_ELEMENT)), repair.getParameterMeasurements(), stringSequentialNumber, table));
             }
         } else {

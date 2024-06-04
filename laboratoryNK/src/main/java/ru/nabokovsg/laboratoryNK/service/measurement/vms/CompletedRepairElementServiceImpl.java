@@ -9,19 +9,16 @@ import ru.nabokovsg.laboratoryNK.dto.measurement.vms.completedRepairElement.Comp
 import ru.nabokovsg.laboratoryNK.dto.measurement.vms.completedRepairElement.ResponseCompletedRepairElementDto;
 import ru.nabokovsg.laboratoryNK.exceptions.NotFoundException;
 import ru.nabokovsg.laboratoryNK.mapper.measurement.vms.CompletedRepairElementMapper;
-import ru.nabokovsg.laboratoryNK.model.equipmentDiagnosed.EquipmentElement;
-import ru.nabokovsg.laboratoryNK.model.equipmentDiagnosed.PartElement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.CompletedRepairElement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.QCompletedRepairElement;
+import ru.nabokovsg.laboratoryNK.model.measurement.vms.QVMSurvey;
 import ru.nabokovsg.laboratoryNK.model.norms.ElementRepair;
 import ru.nabokovsg.laboratoryNK.repository.measurement.vms.CompletedRepairElementRepository;
-import ru.nabokovsg.laboratoryNK.service.equipmentDiagnosed.EquipmentElementService;
 import ru.nabokovsg.laboratoryNK.service.norms.ElementRepairService;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,21 +29,16 @@ public class CompletedRepairElementServiceImpl implements CompletedRepairElement
     private final ElementRepairService repairService;
     private final ParameterMeasurementService parameterMeasurementService;
     private final EntityManager em;
-    private final EquipmentElementService equipmentElementService;
+    private final VMSurveyService vmSurveyService;
 
     @Override
     public ResponseCompletedRepairElementDto save(CompletedRepairElementDto repairDto) {
         CompletedRepairElement repair = getByPredicate(repairDto);
         ElementRepair elementRepair = repairService.getById(repairDto.getRepairId());
         if (repair == null) {
-            EquipmentElement element = equipmentElementService.getById(repairDto.getElementId());
-            Map<Long, PartElement> partsElement = element.getPartsElement()
-                    .stream().collect(Collectors.toMap(PartElement::getId, p -> p));
-            repair = mapper.mapWithEquipmentElement(repairDto, elementRepair, element);
-            if(repairDto.getPartElementId() != null) {
-                repair = mapper.mapWithPartElement(repair, partsElement.get(repairDto.getPartElementId()));
-            }
-            repair = repository.save(repair);
+            repair = repository.save(mapper.mapToCompletedRepairElement(repairDto, elementRepair
+                                        , vmSurveyService.save(repairDto.getSurveyJournalId(), repairDto.getEquipmentId()
+                                                             , repairDto.getElementId(), repairDto.getPartElementId())));
         }
         repair.getParameterMeasurements().addAll(parameterMeasurementService.saveCompletedRepairElement(elementRepair, repair, repairDto.getParameterMeasurements()));
         return mapper.mapToResponseCompletedRepairElementDto(repair);
@@ -56,14 +48,9 @@ public class CompletedRepairElementServiceImpl implements CompletedRepairElement
     public ResponseCompletedRepairElementDto update(CompletedRepairElementDto repairDto) {
         if (repository.existsById(repairDto.getId())) {
             ElementRepair elementRepair = repairService.getById(repairDto.getRepairId());
-            EquipmentElement element = equipmentElementService.getById(repairDto.getElementId());
-            Map<Long, PartElement> partsElement = element.getPartsElement()
-                    .stream().collect(Collectors.toMap(PartElement::getId, p -> p));
-            CompletedRepairElement repair = mapper.mapWithEquipmentElement(repairDto, elementRepair, element);
-            if(repairDto.getPartElementId() != null) {
-                repair = mapper.mapWithPartElement(repair, partsElement.get(repairDto.getPartElementId()));
-            }
-            repair = repository.save(repair);
+            CompletedRepairElement repair = repository.save(mapper.mapToCompletedRepairElement(repairDto, elementRepair
+                    , vmSurveyService.save(repairDto.getSurveyJournalId(), repairDto.getEquipmentId()
+                            , repairDto.getElementId(), repairDto.getPartElementId())));
             repair.getParameterMeasurements().addAll(parameterMeasurementService.saveCompletedRepairElement(elementRepair, repair, repairDto.getParameterMeasurements()));
             return mapper.mapToResponseCompletedRepairElementDto(repair);
         }
@@ -73,15 +60,30 @@ public class CompletedRepairElementServiceImpl implements CompletedRepairElement
 
     @Override
     public List<ResponseCompletedRepairElementDto> getAll(Long id) {
-        return repository.findAllBySurveyJournalId(id)
-                         .stream()
-                         .map(mapper::mapToResponseCompletedRepairElementDto)
-                         .toList();
+        QCompletedRepairElement repair = QCompletedRepairElement.completedRepairElement;
+        QVMSurvey vm = QVMSurvey.vMSurvey;
+        BooleanBuilder booleanBuilder = new BooleanBuilder();
+        booleanBuilder.and(vm.surveyJournalId.eq(id));
+        return new JPAQueryFactory(em).from(repair)
+                                      .select(repair)
+                                      .where(booleanBuilder)
+                                      .fetch()
+                                      .stream()
+                                      .map(mapper::mapToResponseCompletedRepairElementDto)
+                                      .toList();
     }
 
     @Override
     public Set<CompletedRepairElement> getAllByIds(Long surveyJournalId, Long equipmentId) {
-        Set<CompletedRepairElement> repairElements = repository.findAllBySurveyJournalIdAndEquipmentId(surveyJournalId, equipmentId);
+        QCompletedRepairElement repair = QCompletedRepairElement.completedRepairElement;
+        QVMSurvey vm = QVMSurvey.vMSurvey;
+        BooleanBuilder booleanBuilder = new BooleanBuilder();
+        booleanBuilder.and(vm.surveyJournalId.eq(surveyJournalId));
+        booleanBuilder.and(vm.equipmentId.eq(equipmentId));
+        Set<CompletedRepairElement> repairElements = new HashSet<>(new JPAQueryFactory(em).from(repair)
+                                                                                          .select(repair)
+                                                                                          .where(booleanBuilder)
+                                                                                          .fetch());
         if (repairElements.isEmpty()) {
             throw new NotFoundException(
                     String.format("CompletedRepairElement with surveyJournalId=%s and surveyJournalId=%s not found"
@@ -100,16 +102,15 @@ public class CompletedRepairElementServiceImpl implements CompletedRepairElement
     }
 
     private CompletedRepairElement getByPredicate(CompletedRepairElementDto repairDto) {
+        QVMSurvey vm = QVMSurvey.vMSurvey;
         QCompletedRepairElement repair = QCompletedRepairElement.completedRepairElement;
         BooleanBuilder booleanBuilder = new BooleanBuilder();
-        booleanBuilder.and(repair.surveyJournalId.eq(repairDto.getSurveyJournalId()));
-        booleanBuilder.and(repair.equipmentId.eq(repairDto.getEquipmentId()));
-        booleanBuilder.and(repair.elementId.eq(repairDto.getElementId()));
-        if(repairDto.getRepairId() != null) {
-            booleanBuilder.and(repair.repairId.eq(repairDto.getRepairId()));
-        }
+        booleanBuilder.and(vm.surveyJournalId.eq(repairDto.getSurveyJournalId()));
+        booleanBuilder.and(vm.equipmentId.eq(repairDto.getEquipmentId()));
+        booleanBuilder.and(vm.elementId.eq(repairDto.getElementId()));
+        booleanBuilder.and(repair.repairId.eq(repairDto.getRepairId()));
         if (repairDto.getPartElementId() != null) {
-            booleanBuilder.and(repair.partElementId.eq(repairDto.getPartElementId()));
+            booleanBuilder.and(vm.partElementId.eq(repairDto.getPartElementId()));
         }
         return new JPAQueryFactory(em).from(repair)
                 .select(repair)

@@ -17,7 +17,7 @@ import ru.nabokovsg.laboratoryNK.model.measurement.gm.ReferencePoint;
 import ru.nabokovsg.laboratoryNK.model.measurement.utm.ResultUltrasonicThicknessMeasurement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.CompletedRepairElement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.DefectMeasurement;
-import ru.nabokovsg.laboratoryNK.model.measurement.vms.VisualInspection;
+import ru.nabokovsg.laboratoryNK.model.measurement.vms.VMSurvey;
 import ru.nabokovsg.laboratoryNK.repository.document.CellTableRepository;
 import ru.nabokovsg.laboratoryNK.service.equipmentDiagnosed.EquipmentElementService;
 import ru.nabokovsg.laboratoryNK.service.measurement.common.EquipmentInspectionService;
@@ -27,9 +27,7 @@ import ru.nabokovsg.laboratoryNK.service.measurement.gm.PointDifferenceService;
 import ru.nabokovsg.laboratoryNK.service.measurement.gm.ReferencePointMeasurementService;
 import ru.nabokovsg.laboratoryNK.service.measurement.hardnessMeasurement.HardnessMeasurementService;
 import ru.nabokovsg.laboratoryNK.service.measurement.utm.ResultUltrasonicThicknessMeasurementService;
-import ru.nabokovsg.laboratoryNK.service.measurement.vms.CompletedRepairElementService;
-import ru.nabokovsg.laboratoryNK.service.measurement.vms.DefectMeasurementService;
-import ru.nabokovsg.laboratoryNK.service.measurement.vms.VisualInspectionService;
+import ru.nabokovsg.laboratoryNK.service.measurement.vms.VMSurveyService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,11 +44,9 @@ public class CellTableServiceImpl implements CellTableService {
     private final PointDifferenceService pointDifferenceService;
     private final HardnessMeasurementService hardnessMeasurementService;
     private final ResultUltrasonicThicknessMeasurementService utMeasurementService;
-    private final DefectMeasurementService defectMeasurementService;
-    private final CompletedRepairElementService completedRepairElementService;
-    private final VisualInspectionService visualInspectionService;
     private final EquipmentRepairService equipmentRepairService;
     private final EquipmentElementService elementService;
+    private final VMSurveyService vmSurveyService;
 
     @Override
     public void saveEquipmentInspection(DocumentTable table, TableTemplate tableTemplate, SurveyJournal surveyJournal) {
@@ -232,53 +228,47 @@ public class CellTableServiceImpl implements CellTableService {
 
         List<CellTable> cells = new ArrayList<>();
         Map<String, Integer> mergeLines = new HashMap<>();
-        Map<String, List<DefectMeasurement>> defectsMeasurement = new HashMap<>();
-        Map<String, List<CompletedRepairElement>> repairElements = new HashMap<>();
-        Map<String, String> visualInspections = visualInspectionService.getAllByIds(surveyJournal.getId()
+        Map<String, Set<DefectMeasurement>> defectsMeasurement = new HashMap<>();
+        Map<String, Set<CompletedRepairElement>> repairElements = new HashMap<>();
+        Map<String, String> visualInspections = vmSurveyService.getAll(surveyJournal.getId()
                            , surveyJournal.getEquipmentId()).stream()
-                                                            .collect(Collectors.toMap(VisualInspection::getElementName
-                                                                                    , VisualInspection::getInspection));
-        defectMeasurementService.getAllByIds(surveyJournal.getId(), surveyJournal.getEquipmentId())
-                .forEach(d -> {
-                                List<DefectMeasurement> defects = defectsMeasurement.get(d.getElementName());
-                                defects.add(d);
-                                defectsMeasurement.put(d.getElementName(), defects);
-                                mergeLines.put(d.getElementName(), d.getParameterMeasurements().size());
-                            });
-        completedRepairElementService.getAllByIds(surveyJournal.getId(), surveyJournal.getEquipmentId())
-                 .forEach(r -> {
-                                List<CompletedRepairElement> repairs = repairElements.get(r.getElementName());
-                                repairs.add(r);
-                                repairElements.put(r.getElementName(), repairs);
-                                if (mergeLines.get(r.getElementName()) < r.getParameterMeasurements().size()) {
-                                    mergeLines.put(r.getElementName(), r.getParameterMeasurements().size());
-                                }
-                            });
-        elementService.getAllElementName(surveyJournal.getEquipmentId())
-                .stream()
-                .filter(s -> !mergeLines.containsKey(s))
-                .collect(Collectors.toSet())
-                .forEach(k -> {
-                     int stringSequentialNumber = 1;
-                     cells.add(cellFactoryService.createElementCell(columnHeaders
-                                                                  , mergeLines.get(k)
-                                                                  , stringSequentialNumber
-                                                                  , k
-                                                                  , table));
-                     cells.addAll(cellFactoryService.createDefectCell(columnHeaders
-                                                                    , defectsMeasurement.get(k)
-                                                                    , stringSequentialNumber
-                                                                    , table));
-                     cells.addAll(cellFactoryService.createRepairElementCell(columnHeaders
-                                                                           , repairElements.get(k)
-                                                                           , stringSequentialNumber
-                                                                           , table));
-                     cells.add(cellFactoryService.createVisualInspectionCell(columnHeaders
-                                                                           , stringSequentialNumber
-                                                                           , visualInspections.get(k)
-                                                                           , table));
-                     stringSequentialNumber += mergeLines.get(k);
-                });
+                                                            .collect(Collectors.toMap(VMSurvey::getElementName
+                                                                                    , VMSurvey::getInspection));
+        vmSurveyService.getAll(surveyJournal.getId(), surveyJournal.getEquipmentId()).stream().collect(Collectors.toMap(VMSurvey::getElementName, v -> v))
+                .forEach((k, v) -> {
+                            defectsMeasurement.put(k, v.getDefects());
+                            mergeLines.put(k, v.getDefects().size());
+                            repairElements.put(k, v.getRepairs());
+                            if (mergeLines.get(k) < v.getRepairs().size()) {
+                                mergeLines.put(k, v.getRepairs().size());
+                            }
+                        });
+
+            elementService.getAllElementName(surveyJournal.getEquipmentId())
+                    .stream()
+                    .filter(s -> !mergeLines.containsKey(s))
+                    .collect(Collectors.toSet())
+                    .forEach(k -> {
+                        int stringSequentialNumber = 1;
+                        cells.add(cellFactoryService.createElementCell(columnHeaders
+                                , mergeLines.get(k)
+                                , stringSequentialNumber
+                                , k
+                                , table));
+                        cells.addAll(cellFactoryService.createDefectCell(columnHeaders
+                                , defectsMeasurement.get(k)
+                                , stringSequentialNumber
+                                , table));
+                        cells.addAll(cellFactoryService.createRepairElementCell(columnHeaders
+                                , repairElements.get(k)
+                                , stringSequentialNumber
+                                , table));
+                        cells.add(cellFactoryService.createVisualInspectionCell(columnHeaders
+                                , stringSequentialNumber
+                                , visualInspections.get(k)
+                                , table));
+                        stringSequentialNumber += mergeLines.get(k);
+                    });
         repository.saveAll(cells);
     }
 }

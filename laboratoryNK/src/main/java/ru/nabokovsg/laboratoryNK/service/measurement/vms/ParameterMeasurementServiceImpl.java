@@ -27,7 +27,8 @@ public class ParameterMeasurementServiceImpl extends ConstParameterMeasurement i
 
     @Override
     public Set<CalculationParameterMeasurement> saveDefectMeasurement(Defect defect, DefectMeasurement defectMeasurement, List<ParameterMeasurementDto> parameterMeasurementsDto) {
-        Set<CalculationParameterMeasurement> calculations = calculationService.calculation(defect, defectMeasurement, parameterMeasurementsDto).stream().map(p -> mapper.mapWithDefectMeasurement(p, defectMeasurement)).collect(Collectors.toSet());
+        calculationService.calculation(defect, defectMeasurement, parameterMeasurementsDto);
+        Set<CalculationParameterMeasurement> calculations =defectMeasurement.getParameterMeasurements().stream().map(p -> mapper.mapWithDefectMeasurement(p, defectMeasurement)).collect(Collectors.toSet());
         setNumbers(calculations);
         return new HashSet<>(repository.saveAll(calculations));
     }
