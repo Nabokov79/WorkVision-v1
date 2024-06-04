@@ -114,6 +114,7 @@ public class CompletedRepairElementServiceImpl implements CompletedRepairElement
         }
         return new JPAQueryFactory(em).from(repair)
                 .select(repair)
+                .innerJoin(vm).on(repair.vmSurvey.id.eq(vm.id))
                 .where(booleanBuilder)
                 .fetchOne();
     }

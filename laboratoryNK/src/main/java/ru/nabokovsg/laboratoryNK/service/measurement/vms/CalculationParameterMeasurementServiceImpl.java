@@ -119,7 +119,7 @@ public class CalculationParameterMeasurementServiceImpl extends ConstParameterMe
         if (square.getFirstValue() == 0) {
             square.setFirstValue(countSquareByLengthAndHeight(parameterMeasurementsDto));
         }
-        if (parameterMeasurement.getUnitMeasurement().equals(getM2())) {
+        if (parameterMeasurement != null && parameterMeasurement.getUnitMeasurement().equals(getM2())) {
             square.setFirstValue(square.getFirstValue() / 1000000);
         }
         for (CalculationParameterMeasurement parameter : parameterMeasurements) {

@@ -135,7 +135,7 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
         QDefectMeasurement defect = QDefectMeasurement.defectMeasurement;
         QVMSurvey vm = QVMSurvey.vMSurvey;
         BooleanBuilder booleanBuilder = new BooleanBuilder();
-        booleanBuilder.and(vm.id.eq(defect.vmSurvey.id));
+        booleanBuilder.and(defect.id.eq(defectMeasurementDto.getDefectId()));
         booleanBuilder.and(defect.defectId.eq(defectMeasurementDto.getDefectId()));
         booleanBuilder.and(vm.surveyJournalId.eq(defectMeasurementDto.getSurveyJournalId()));
         booleanBuilder.and(vm.equipmentId.eq(defectMeasurementDto.getEquipmentId()));
@@ -145,6 +145,7 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
         }
         return new JPAQueryFactory(em).from(defect)
                                       .select(defect)
+                                      .innerJoin(vm).on(defect.vmSurvey.id.eq(vm.id))
                                       .where(booleanBuilder)
                                       .fetchOne();
     }
