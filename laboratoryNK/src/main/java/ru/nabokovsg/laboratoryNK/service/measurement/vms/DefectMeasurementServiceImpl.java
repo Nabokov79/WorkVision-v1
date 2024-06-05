@@ -4,7 +4,6 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.nabokovsg.laboratoryNK.dto.measurement.vms.defectMeasurement.DefectMeasurementDto;
 import ru.nabokovsg.laboratoryNK.dto.measurement.vms.defectMeasurement.ResponseDefectMeasurementDto;
@@ -25,7 +24,6 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class DefectMeasurementServiceImpl implements DefectMeasurementService {
 
     private final DefectMeasurementRepository repository;
@@ -39,14 +37,12 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
     public ResponseDefectMeasurementDto save(DefectMeasurementDto measurementDto) {
         DefectMeasurement measurement = getByPredicate(measurementDto);
         Defect defect = defectsService.getById(measurementDto.getDefectId());
-        log.info("DefectMeasurement measurement = {}", measurement);
         if (measurement == null) {
             measurement = repository.save(mapper.mapWithEquipmentElement(measurementDto, defect
                     , vmSurveyService.save(measurementDto.getSurveyJournalId(), measurementDto.getEquipmentId()
                                          , measurementDto.getElementId(), measurementDto.getPartElementId())));
         }
         measurement.setParameterMeasurements(parameterMeasurementService.saveDefectMeasurement(defect, measurement, measurementDto.getParameterMeasurements()));
-        log.info("-----------------------------END-------------------------------------");
         return mapper.mapToResponseDefectMeasurementDto(measurement);
     }
 
