@@ -131,7 +131,6 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
         QDefectMeasurement defect = QDefectMeasurement.defectMeasurement;
         QVMSurvey vm = QVMSurvey.vMSurvey;
         BooleanBuilder booleanBuilder = new BooleanBuilder();
-        booleanBuilder.and(defect.id.eq(defectMeasurementDto.getDefectId()));
         booleanBuilder.and(defect.defectId.eq(defectMeasurementDto.getDefectId()));
         booleanBuilder.and(vm.surveyJournalId.eq(defectMeasurementDto.getSurveyJournalId()));
         booleanBuilder.and(vm.equipmentId.eq(defectMeasurementDto.getEquipmentId()));

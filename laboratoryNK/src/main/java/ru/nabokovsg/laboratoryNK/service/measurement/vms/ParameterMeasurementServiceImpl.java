@@ -9,11 +9,15 @@ import ru.nabokovsg.laboratoryNK.model.measurement.common.ConstParameterMeasurem
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.CalculationParameterMeasurement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.CompletedRepairElement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.DefectMeasurement;
+import ru.nabokovsg.laboratoryNK.model.norms.CalculationType;
 import ru.nabokovsg.laboratoryNK.model.norms.Defect;
 import ru.nabokovsg.laboratoryNK.model.norms.ElementRepair;
+import ru.nabokovsg.laboratoryNK.model.norms.MeasuredParameter;
 import ru.nabokovsg.laboratoryNK.repository.measurement.vms.ParameterMeasurementServiceRepository;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,33 +31,73 @@ public class ParameterMeasurementServiceImpl extends ConstParameterMeasurement i
 
     @Override
     public Set<CalculationParameterMeasurement> saveDefectMeasurement(Defect defect, DefectMeasurement defectMeasurement, List<ParameterMeasurementDto> parameterMeasurementsDto) {
-        calculationService.calculation(defect, defectMeasurement, parameterMeasurementsDto);
+        if (defectMeasurement.getParameterMeasurements() == null) {
+            defectMeasurement.setParameterMeasurements(createCalculationParameterMeasurement(defect.getTypeCalculation(), defect.getMeasuredParameters()));
+        }
+        calculationService.calculation(defect.getTypeCalculation(), defect.getMeasuredParameters(), defectMeasurement.getParameterMeasurements(), parameterMeasurementsDto);
         Set<CalculationParameterMeasurement> calculations = defectMeasurement.getParameterMeasurements().stream().map(p -> mapper.mapWithDefectMeasurement(p, defectMeasurement)).collect(Collectors.toSet());
-        setNumbers(calculations);
+        setSequentialNumberParameters(calculations);
         return new HashSet<>(repository.saveAll(calculations));
     }
 
     @Override
     public Set<CalculationParameterMeasurement> saveCompletedRepairElement(ElementRepair elementRepair, CompletedRepairElement repair, List<ParameterMeasurementDto> parameterMeasurementsDto) {
-        return null;
+        if (repair.getParameterMeasurements() == null) {
+            repair.setParameterMeasurements(createCalculationParameterMeasurement(elementRepair.getTypeCalculation(), elementRepair.getMeasuredParameters()));
+        }
+        calculationService.calculation(elementRepair.getTypeCalculation(), elementRepair.getMeasuredParameters(), repair.getParameterMeasurements(), parameterMeasurementsDto);
+        Set<CalculationParameterMeasurement> calculations = repair.getParameterMeasurements().stream().map(p -> mapper.mapWithCompletedRepairElement(p, repair)).collect(Collectors.toSet());
+        setSequentialNumberParameters(calculations);
+        return new HashSet<>(repository.saveAll(calculations));
     }
 
-    private void setNumbers(Set<CalculationParameterMeasurement> parameterMeasurements) {
+    private void setSequentialNumberParameters(Set<CalculationParameterMeasurement> parameterMeasurements) {
         int sequentialNumber = 1;
         int number = 1;
         int size = parameterMeasurements.size();
-        for (CalculationParameterMeasurement measurement : parameterMeasurements) {
-            if (measurement.getNumber() == null) {
-                measurement.setNumber(number);
-                if (measurement.getParameterName().equals(getQuantity())) {
-                    measurement.setSequentialNumber(size);
-                } else if (measurement.getParameterName().equals(getSquare())) {
-                    measurement.setSequentialNumber(1);
+        for (CalculationParameterMeasurement parameter : parameterMeasurements) {
+            if (parameter.getNumber() != null && parameter.getSequentialNumber() != null) {
+                if (number < parameter.getNumber()) {
+                    number = parameter.getNumber();
+                }
+                if (sequentialNumber < parameter.getSequentialNumber()) {
+                    sequentialNumber = parameter.getSequentialNumber();
+                }
+                size = size - 1;
+            }
+            if (parameter.getNumber() == null) {
+                if (parameter.getParameterName().equals(getSquare())) {
+                    parameter.setNumber(number);
+                    parameter.setSequentialNumber(sequentialNumber);
+                } else if (parameter.getParameterName().equals(getQuantity())) {
+                    parameter.setNumber(number);
+                    parameter.setSequentialNumber(size);
                 } else {
-                    measurement.setSequentialNumber(sequentialNumber);
-                    sequentialNumber += 1;
+                    parameter.setNumber(number);
+                    parameter.setSequentialNumber(sequentialNumber + 1);
                 }
             }
         }
+    }
+
+    private Set<CalculationParameterMeasurement> createCalculationParameterMeasurement(CalculationType typeCalculation, Set<MeasuredParameter> measuredParameters) {
+        Set<CalculationParameterMeasurement> parameterMeasurements = new HashSet<>();
+        switch (typeCalculation) {
+            case SQUARE ->  {
+                parameterMeasurements.add(mapper.mapToShortCalculationParameter(getSquare(), null, getM2()));
+                parameterMeasurements.add(mapper.mapToShortCalculationParameter(getQuantity(), 0.0, getPieces()));
+                measuredParameters.forEach(m -> {
+                    if (!m.getParameterName().equals(getLength()) && !m.getParameterName().equals(getWidth()) && !m.getParameterName().equals(getDiameter())) {
+                        log.info("Create ParameterName: {}", m.getParameterName());
+                        parameterMeasurements.add(mapper.mapToShortCalculationParameter(m.getParameterName(), null, m.getUnitMeasurement()));
+                    }
+                });
+            }
+            case QUANTITY -> {
+                measuredParameters.forEach(m -> parameterMeasurements.add(mapper.mapToShortCalculationParameter(m.getParameterName(), null, m.getUnitMeasurement())));
+                parameterMeasurements.add(mapper.mapToShortCalculationParameter(getQuantity(), null, getPieces()));
+            }
+        }
+        return parameterMeasurements;
     }
 }
