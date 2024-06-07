@@ -9,6 +9,7 @@ import ru.nabokovsg.laboratoryNK.dto.measurement.vms.completedRepairElement.Comp
 import ru.nabokovsg.laboratoryNK.dto.measurement.vms.completedRepairElement.ResponseCompletedRepairElementDto;
 import ru.nabokovsg.laboratoryNK.exceptions.NotFoundException;
 import ru.nabokovsg.laboratoryNK.mapper.measurement.vms.CompletedRepairElementMapper;
+import ru.nabokovsg.laboratoryNK.model.measurement.vms.Builder;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.CompletedRepairElement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.QCompletedRepairElement;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.QVMSurvey;
@@ -48,11 +49,16 @@ public class CompletedRepairElementServiceImpl implements CompletedRepairElement
     public ResponseCompletedRepairElementDto update(CompletedRepairElementDto repairDto) {
         if (repository.existsById(repairDto.getId())) {
             ElementRepair elementRepair = repairService.getById(repairDto.getRepairId());
-            CompletedRepairElement repair = repository.save(mapper.mapToCompletedRepairElement(repairDto, elementRepair
+            CompletedRepairElement completedRepair = repository.save(mapper.mapToCompletedRepairElement(repairDto, elementRepair
                     , vmSurveyService.save(repairDto.getSurveyJournalId(), repairDto.getEquipmentId()
                             , repairDto.getElementId(), repairDto.getPartElementId())));
-            repair.getParameterMeasurements().addAll(parameterMeasurementService.saveCompletedRepairElement(elementRepair, repair, repairDto.getParameterMeasurements()));
-            return mapper.mapToResponseCompletedRepairElementDto(repair);
+            completedRepair.setParameterMeasurements(parameterMeasurementService.save(
+                                                    new Builder.ParameterMeasurementBuilder()
+                                                            .elementRepair(elementRepair)
+                                                            .completedRepair(completedRepair)
+                                                            .parameterMeasurements(repairDto.getParameterMeasurements())
+                                                            .build()));
+            return mapper.mapToResponseCompletedRepairElementDto(completedRepair);
         }
         throw new NotFoundException(
                 String.format("Completed repair element with id=%s not found for update", repairDto.getId()));

@@ -3,20 +3,15 @@ package ru.nabokovsg.laboratoryNK.service.measurement.vms;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.nabokovsg.laboratoryNK.dto.measurement.vms.parameterMeasurement.ParameterMeasurementDto;
 import ru.nabokovsg.laboratoryNK.mapper.measurement.vms.ParameterMeasurementMapper;
 import ru.nabokovsg.laboratoryNK.model.measurement.common.ConstParameterMeasurement;
+import ru.nabokovsg.laboratoryNK.model.measurement.vms.Builder;
 import ru.nabokovsg.laboratoryNK.model.measurement.vms.CalculationParameterMeasurement;
-import ru.nabokovsg.laboratoryNK.model.measurement.vms.CompletedRepairElement;
-import ru.nabokovsg.laboratoryNK.model.measurement.vms.DefectMeasurement;
 import ru.nabokovsg.laboratoryNK.model.norms.CalculationType;
-import ru.nabokovsg.laboratoryNK.model.norms.Defect;
-import ru.nabokovsg.laboratoryNK.model.norms.ElementRepair;
 import ru.nabokovsg.laboratoryNK.model.norms.MeasuredParameter;
 import ru.nabokovsg.laboratoryNK.repository.measurement.vms.ParameterMeasurementServiceRepository;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,28 +25,39 @@ public class ParameterMeasurementServiceImpl extends ConstParameterMeasurement i
     private final CalculationParameterMeasurementService calculationService;
 
     @Override
-    public Set<CalculationParameterMeasurement> saveDefectMeasurement(Defect defect, DefectMeasurement defectMeasurement, List<ParameterMeasurementDto> parameterMeasurementsDto) {
-        if (defectMeasurement.getParameterMeasurements() == null) {
-            defectMeasurement.setParameterMeasurements(createCalculationParameterMeasurement(defect.getTypeCalculation(), defect.getMeasuredParameters()));
+    public Set<CalculationParameterMeasurement> save(Builder builder) {
+        Set<CalculationParameterMeasurement> calculations = new HashSet<>();
+        if (builder.getDefectMeasurement().getParameterMeasurements() == null) {
+            calculations.addAll(createCalculationParameterMeasurement(builder.getDefect().getTypeCalculation()
+                                                                    , builder.getDefect().getMeasuredParameters()));
         }
-        calculationService.calculation(defect.getTypeCalculation(), defect.getMeasuredParameters(), defectMeasurement.getParameterMeasurements(), parameterMeasurementsDto);
-        Set<CalculationParameterMeasurement> calculations = defectMeasurement.getParameterMeasurements().stream().map(p -> mapper.mapWithDefectMeasurement(p, defectMeasurement)).collect(Collectors.toSet());
-        setSequentialNumberParameters(calculations);
+        if (builder.getCompletedRepair().getParameterMeasurements() == null) {
+            calculations.addAll(createCalculationParameterMeasurement(builder.getElementRepair().getTypeCalculation()
+                    , builder.getElementRepair().getMeasuredParameters()));
+        }
+        if (builder.getDefect() != null) {
+            calculations = calculationService.calculation(builder.getDefect().getTypeCalculation()
+                                                        , builder.getDefect().getMeasuredParameters()
+                                                        , builder.getDefectMeasurement().getParameterMeasurements()
+                                                        , builder.getParameterMeasurementsDto());
+            calculations = calculations.stream()
+                                       .map(p -> mapper.mapWithDefectMeasurement(p, builder.getDefectMeasurement()))
+                                       .collect(Collectors.toSet());
+        }
+        if (builder.getElementRepair() != null) {
+            calculations = setSequentialNumberParameters(calculationService.calculation(
+                                           builder.getElementRepair().getTypeCalculation()
+                                         , builder.getElementRepair().getMeasuredParameters()
+                                         , builder.getCompletedRepair().getParameterMeasurements()
+                                         , builder.getParameterMeasurementsDto()));
+            calculations = calculations.stream()
+                                       .map(p -> mapper.mapWithCompletedRepairElement(p, builder.getCompletedRepair()))
+                                       .collect(Collectors.toSet());
+        }
         return new HashSet<>(repository.saveAll(calculations));
     }
 
-    @Override
-    public Set<CalculationParameterMeasurement> saveCompletedRepairElement(ElementRepair elementRepair, CompletedRepairElement repair, List<ParameterMeasurementDto> parameterMeasurementsDto) {
-        if (repair.getParameterMeasurements() == null) {
-            repair.setParameterMeasurements(createCalculationParameterMeasurement(elementRepair.getTypeCalculation(), elementRepair.getMeasuredParameters()));
-        }
-        calculationService.calculation(elementRepair.getTypeCalculation(), elementRepair.getMeasuredParameters(), repair.getParameterMeasurements(), parameterMeasurementsDto);
-        Set<CalculationParameterMeasurement> calculations = repair.getParameterMeasurements().stream().map(p -> mapper.mapWithCompletedRepairElement(p, repair)).collect(Collectors.toSet());
-        setSequentialNumberParameters(calculations);
-        return new HashSet<>(repository.saveAll(calculations));
-    }
-
-    private void setSequentialNumberParameters(Set<CalculationParameterMeasurement> parameterMeasurements) {
+    private Set<CalculationParameterMeasurement> setSequentialNumberParameters(Set<CalculationParameterMeasurement> parameterMeasurements) {
         int sequentialNumber = 1;
         int number = 1;
         int size = parameterMeasurements.size();
@@ -78,6 +84,7 @@ public class ParameterMeasurementServiceImpl extends ConstParameterMeasurement i
                 }
             }
         }
+        return parameterMeasurements;
     }
 
     private Set<CalculationParameterMeasurement> createCalculationParameterMeasurement(CalculationType typeCalculation, Set<MeasuredParameter> measuredParameters) {

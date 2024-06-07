@@ -25,7 +25,7 @@ public class CalculationParameterMeasurementServiceImpl extends ConstParameterMe
     private final ParameterMeasurementMapper mapper;
 
     @Override
-    public void calculation(CalculationType typeCalculation, Set<MeasuredParameter> measuredParameters, Set<CalculationParameterMeasurement> parameterMeasurements, List<ParameterMeasurementDto> parameterMeasurementsDto) {
+    public Set<CalculationParameterMeasurement> calculation(CalculationType typeCalculation, Set<MeasuredParameter> measuredParameters, Set<CalculationParameterMeasurement> parameterMeasurements, List<ParameterMeasurementDto> parameterMeasurementsDto) {
         log.info("Start Calculation: {}", parameterMeasurements);
         Map<Long, MeasuredParameter> parameters = measuredParameters.stream().collect(Collectors.toMap(MeasuredParameter::getId, m -> m));
         Map<String, ParameterMeasurementDto> parametersDto = parameterMeasurementsDto.stream().collect(Collectors.toMap(p -> parameters.get(p.getParameterId()).getParameterName(), parameter -> parameter));
@@ -42,6 +42,7 @@ public class CalculationParameterMeasurementServiceImpl extends ConstParameterMe
         if (!typeCalculation.equals(CalculationType.NO_ACTION)) {
             countDefectOrCompletedRepair(typeCalculation, parameters, parameterMeasurements, parameterMeasurementsDto);
         }
+        return parameterMeasurements;
     }
 
     private void countDefectOrCompletedRepair(CalculationType typeCalculation, Map<Long, MeasuredParameter> measuredParameters, Set<CalculationParameterMeasurement> parameterMeasurements, List<ParameterMeasurementDto> parameterMeasurementsDto) {

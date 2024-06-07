@@ -10,5 +10,5 @@ import java.util.Set;
 
 public interface CalculationParameterMeasurementService {
 
-    void calculation(CalculationType typeCalculation, Set<MeasuredParameter> measuredParameters, Set<CalculationParameterMeasurement> parameterMeasurements, List<ParameterMeasurementDto> parameterMeasurementsDto);
+    Set<CalculationParameterMeasurement> calculation(CalculationType typeCalculation, Set<MeasuredParameter> measuredParameters, Set<CalculationParameterMeasurement> parameterMeasurements, List<ParameterMeasurementDto> parameterMeasurementsDto);
 }

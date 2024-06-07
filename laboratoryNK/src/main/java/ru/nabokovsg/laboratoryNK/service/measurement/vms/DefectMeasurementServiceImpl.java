@@ -10,10 +10,7 @@ import ru.nabokovsg.laboratoryNK.dto.measurement.vms.defectMeasurement.ResponseD
 import ru.nabokovsg.laboratoryNK.exceptions.NotFoundException;
 import ru.nabokovsg.laboratoryNK.mapper.measurement.vms.DefectMeasurementMapper;
 import ru.nabokovsg.laboratoryNK.model.measurement.utm.UltrasonicThicknessMeasurement;
-import ru.nabokovsg.laboratoryNK.model.measurement.vms.DefectMeasurement;
-import ru.nabokovsg.laboratoryNK.model.measurement.vms.QCalculationParameterMeasurement;
-import ru.nabokovsg.laboratoryNK.model.measurement.vms.QDefectMeasurement;
-import ru.nabokovsg.laboratoryNK.model.measurement.vms.QVMSurvey;
+import ru.nabokovsg.laboratoryNK.model.measurement.vms.*;
 import ru.nabokovsg.laboratoryNK.model.norms.Defect;
 import ru.nabokovsg.laboratoryNK.repository.measurement.vms.DefectMeasurementRepository;
 import ru.nabokovsg.laboratoryNK.service.norms.DefectService;
@@ -42,7 +39,12 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
                     , vmSurveyService.save(measurementDto.getSurveyJournalId(), measurementDto.getEquipmentId()
                                          , measurementDto.getElementId(), measurementDto.getPartElementId())));
         }
-        measurement.setParameterMeasurements(parameterMeasurementService.saveDefectMeasurement(defect, measurement, measurementDto.getParameterMeasurements()));
+        measurement.setParameterMeasurements(parameterMeasurementService.save(
+                new Builder.ParameterMeasurementBuilder()
+                           .defect(defect)
+                           .defectMeasurement(measurement)
+                           .parameterMeasurements(measurementDto.getParameterMeasurements())
+                           .build()));
         return mapper.mapToResponseDefectMeasurementDto(measurement);
     }
 
