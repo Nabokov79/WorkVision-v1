@@ -10,7 +10,7 @@ import ru.nabokovsg.laboratoryNK.model.measurement.utm.UltrasonicThicknessMeasur
 import ru.nabokovsg.laboratoryNK.model.norms.AcceptableThickness;
 import ru.nabokovsg.laboratoryNK.repository.measurement.utm.ResultUltrasonicThicknessMeasurementRepository;
 import ru.nabokovsg.laboratoryNK.service.equipmentDiagnosed.StandardSizeService;
-import ru.nabokovsg.laboratoryNK.service.measurement.vms.DefectMeasurementService;
+import ru.nabokovsg.laboratoryNK.service.vms.measurement.DefectMeasurementService;
 import ru.nabokovsg.laboratoryNK.service.norms.AcceptableThicknessService;
 
 import java.util.Set;

@@ -14,7 +14,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.nabokovsg.gateway.client.laboratoryNK.measurement.DefectMeasurementClient;
 import ru.nabokovsg.gateway.dto.laboratoryNK.measurement.vms.defectMeasurement.NewDefectMeasurementDto;
-import ru.nabokovsg.gateway.dto.laboratoryNK.measurement.vms.defectMeasurement.UpdateDefectMeasurementDto;
 
 @RestController
 @RequestMapping(
@@ -34,13 +33,6 @@ public class DefectMeasurementController {
     public Mono<Object> save(@RequestBody @Valid @Parameter(name = "Данные измеренного дефекта")
                                                        NewDefectMeasurementDto measurementDto) {
         return client.save(measurementDto);
-    }
-
-    @Operation(summary = "Изменить данные измеренного дефекта")
-    @PatchMapping
-    public Mono<Object> update(@RequestBody @Valid @Parameter(name = "Данные измеренного дефекта")
-                                                      UpdateDefectMeasurementDto measurementDto) {
-        return client.update(measurementDto);
     }
 
     @Operation(summary = "Получить данные измеренных дефектов оборудования")

@@ -1,6 +1,7 @@
 package ru.nabokovsg.gateway.dto.laboratoryNK.measurement.vms.parameterMeasurement;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -23,4 +24,7 @@ public class NewParameterMeasurementDto {
     @NotNull(message = "value should not be null")
     @Positive(message = "value can only be positive")
     private Double value;
+    @Schema(description = "Направление дефекта")
+    @NotBlank(message = "direction should not be blank")
+    private String direction;
 }

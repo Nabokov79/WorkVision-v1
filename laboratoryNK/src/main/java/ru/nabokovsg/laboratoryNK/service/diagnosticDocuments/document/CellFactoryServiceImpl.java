@@ -6,9 +6,9 @@ import ru.nabokovsg.laboratoryNK.mapper.diagnosticDocument.document.CellTableMap
 import ru.nabokovsg.laboratoryNK.model.diagnosticDocuments.document.CellTable;
 import ru.nabokovsg.laboratoryNK.model.diagnosticDocuments.document.DocumentTable;
 import ru.nabokovsg.laboratoryNK.model.documentTemplate.ColumnHeaderType;
-import ru.nabokovsg.laboratoryNK.model.measurement.vms.CalculationParameterMeasurement;
-import ru.nabokovsg.laboratoryNK.model.measurement.vms.CompletedRepairElement;
-import ru.nabokovsg.laboratoryNK.model.measurement.vms.DefectMeasurement;
+import ru.nabokovsg.laboratoryNK.model.vms.measurement.CalculationParameterMeasurement;
+import ru.nabokovsg.laboratoryNK.model.vms.measurement.CompletedRepairElement;
+import ru.nabokovsg.laboratoryNK.model.vms.measurement.DefectMeasurement;
 
 import java.util.*;
 

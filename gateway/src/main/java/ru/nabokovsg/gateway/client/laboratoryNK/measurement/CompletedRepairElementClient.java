@@ -8,7 +8,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.nabokovsg.gateway.client.BaseClient;
 import ru.nabokovsg.gateway.dto.laboratoryNK.measurement.vms.completedRepairElement.NewCompletedRepairElementDto;
-import ru.nabokovsg.gateway.dto.laboratoryNK.measurement.vms.completedRepairElement.UpdateCompletedRepairElementDto;
 
 @Service
 public class CompletedRepairElementClient extends BaseClient {
@@ -25,10 +24,6 @@ public class CompletedRepairElementClient extends BaseClient {
 
     public Mono<Object> save(NewCompletedRepairElementDto repairDto) {
         return post(API_PREFIX, repairDto);
-    }
-
-    public Mono<Object> update(UpdateCompletedRepairElementDto repairDto) {
-        return patch(API_PREFIX, repairDto);
     }
 
     public Flux<Object> getAll(Long id) {

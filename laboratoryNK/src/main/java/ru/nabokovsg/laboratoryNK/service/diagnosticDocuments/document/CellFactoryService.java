@@ -2,8 +2,8 @@ package ru.nabokovsg.laboratoryNK.service.diagnosticDocuments.document;
 
 import ru.nabokovsg.laboratoryNK.model.diagnosticDocuments.document.CellTable;
 import ru.nabokovsg.laboratoryNK.model.diagnosticDocuments.document.DocumentTable;
-import ru.nabokovsg.laboratoryNK.model.measurement.vms.CompletedRepairElement;
-import ru.nabokovsg.laboratoryNK.model.measurement.vms.DefectMeasurement;
+import ru.nabokovsg.laboratoryNK.model.vms.measurement.CompletedRepairElement;
+import ru.nabokovsg.laboratoryNK.model.vms.measurement.DefectMeasurement;
 
 import java.util.List;
 import java.util.Map;

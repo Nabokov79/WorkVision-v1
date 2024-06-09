@@ -14,7 +14,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.nabokovsg.gateway.client.laboratoryNK.measurement.CompletedRepairElementClient;
 import ru.nabokovsg.gateway.dto.laboratoryNK.measurement.vms.completedRepairElement.NewCompletedRepairElementDto;
-import ru.nabokovsg.gateway.dto.laboratoryNK.measurement.vms.completedRepairElement.UpdateCompletedRepairElementDto;
 
 @RestController
 @RequestMapping(
@@ -34,13 +33,6 @@ public class CompletedRepairElementController {
     public Mono<Object> save(@RequestBody @Valid @Parameter(description = "Выполненный ремонт элемента")
                                                                NewCompletedRepairElementDto repairDto) {
         return client.save(repairDto);
-    }
-
-    @Operation(summary = "Изменить выполненный ремонт элемента")
-    @PatchMapping
-    public Mono<Object> update(@RequestBody @Valid @Parameter(description = "Выполненный ремонт элемента")
-                                                              UpdateCompletedRepairElementDto repairDto) {
-        return client.update(repairDto);
     }
 
     @Operation(summary = "Получить выполненные ремонты элементов оборудования по записи журнала обследований")
