@@ -10,13 +10,13 @@ import ru.nabokovsg.laboratoryNK.dto.vms.measurement.defectMeasurement.ResponseD
 import ru.nabokovsg.laboratoryNK.exceptions.NotFoundException;
 import ru.nabokovsg.laboratoryNK.mapper.vms.measurement.DefectMeasurementMapper;
 import ru.nabokovsg.laboratoryNK.model.measurement.utm.UltrasonicThicknessMeasurement;
-import ru.nabokovsg.laboratoryNK.model.vms.QVMSurvey;
+import ru.nabokovsg.laboratoryNK.model.vms.QEquipmentSurvey;
 import ru.nabokovsg.laboratoryNK.model.vms.measurement.QCalculationParameterMeasurement;
 import ru.nabokovsg.laboratoryNK.model.vms.measurement.QDefectMeasurement;
 import ru.nabokovsg.laboratoryNK.model.vms.norm.Defect;
 import ru.nabokovsg.laboratoryNK.model.vms.measurement.DefectMeasurement;
 import ru.nabokovsg.laboratoryNK.repository.vms.measurement.DefectMeasurementRepository;
-import ru.nabokovsg.laboratoryNK.service.vms.VMSurveyService;
+import ru.nabokovsg.laboratoryNK.service.vms.EquipmentSurveyService;
 import ru.nabokovsg.laboratoryNK.service.vms.norm.DefectService;
 
 import java.util.HashSet;
@@ -32,7 +32,7 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
     private final ParameterMeasurementService parameterMeasurementService;
     private final EntityManager em;
     private final DefectService defectsService;
-    private final VMSurveyService vmSurveyService;
+    private final EquipmentSurveyService vmSurveyService;
 
     @Override
     public ResponseDefectMeasurementDto save(DefectMeasurementDto measurementDto) {
@@ -53,7 +53,7 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
     @Override
     public List<ResponseDefectMeasurementDto> getAll(Long id) {
         QDefectMeasurement defect = QDefectMeasurement.defectMeasurement;
-        QVMSurvey vm = QVMSurvey.vMSurvey;
+        QEquipmentSurvey vm = QEquipmentSurvey.equipmentSurvey;
         BooleanBuilder booleanBuilder = new BooleanBuilder();
         booleanBuilder.and(vm.surveyJournalId.eq(id));
         return new JPAQueryFactory(em).from(defect)
@@ -68,7 +68,7 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
     @Override
     public Set<DefectMeasurement> getAllByIds(Long surveyJournalId, Long equipmentId) {
         QDefectMeasurement defect = QDefectMeasurement.defectMeasurement;
-        QVMSurvey vm = QVMSurvey.vMSurvey;
+        QEquipmentSurvey vm = QEquipmentSurvey.equipmentSurvey;
         BooleanBuilder booleanBuilder = new BooleanBuilder();
         booleanBuilder.and(vm.surveyJournalId.eq(surveyJournalId));
         booleanBuilder.and(vm.equipmentId.eq(equipmentId));
@@ -95,7 +95,7 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
 
     @Override
     public Double getMaxCorrosionValueByPredicate(UltrasonicThicknessMeasurement measurement) {
-        QVMSurvey vm = QVMSurvey.vMSurvey;
+        QEquipmentSurvey vm = QEquipmentSurvey.equipmentSurvey;
         QDefectMeasurement defect = QDefectMeasurement.defectMeasurement;
         QCalculationParameterMeasurement parameter = QCalculationParameterMeasurement.calculationParameterMeasurement;
         BooleanBuilder booleanBuilder = new BooleanBuilder();
@@ -119,7 +119,7 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
 
     private DefectMeasurement getByPredicate(DefectMeasurementDto defectMeasurementDto) {
         QDefectMeasurement defect = QDefectMeasurement.defectMeasurement;
-        QVMSurvey vm = QVMSurvey.vMSurvey;
+        QEquipmentSurvey vm = QEquipmentSurvey.equipmentSurvey;
         BooleanBuilder booleanBuilder = new BooleanBuilder();
         booleanBuilder.and(defect.defectId.eq(defectMeasurementDto.getDefectId()));
         booleanBuilder.and(vm.surveyJournalId.eq(defectMeasurementDto.getSurveyJournalId()));
@@ -130,7 +130,7 @@ public class DefectMeasurementServiceImpl implements DefectMeasurementService {
         }
         return new JPAQueryFactory(em).from(defect)
                                       .select(defect)
-                                      .innerJoin(vm).on(defect.vmSurvey.id.eq(vm.id))
+                                      .innerJoin(vm).on(defect.equipmentSurvey.id.eq(vm.id))
                                       .where(booleanBuilder)
                                       .fetchOne();
     }

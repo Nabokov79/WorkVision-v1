@@ -17,7 +17,7 @@ import ru.nabokovsg.laboratoryNK.model.measurement.gm.ReferencePoint;
 import ru.nabokovsg.laboratoryNK.model.measurement.utm.ResultUltrasonicThicknessMeasurement;
 import ru.nabokovsg.laboratoryNK.model.vms.measurement.CompletedRepairElement;
 import ru.nabokovsg.laboratoryNK.model.vms.measurement.DefectMeasurement;
-import ru.nabokovsg.laboratoryNK.model.vms.VMSurvey;
+import ru.nabokovsg.laboratoryNK.model.vms.EquipmentSurvey;
 import ru.nabokovsg.laboratoryNK.repository.document.CellTableRepository;
 import ru.nabokovsg.laboratoryNK.service.equipmentDiagnosed.EquipmentElementService;
 import ru.nabokovsg.laboratoryNK.service.measurement.common.EquipmentInspectionService;
@@ -27,7 +27,7 @@ import ru.nabokovsg.laboratoryNK.service.measurement.gm.PointDifferenceService;
 import ru.nabokovsg.laboratoryNK.service.measurement.gm.ReferencePointMeasurementService;
 import ru.nabokovsg.laboratoryNK.service.measurement.hardnessMeasurement.HardnessMeasurementService;
 import ru.nabokovsg.laboratoryNK.service.measurement.utm.ResultUltrasonicThicknessMeasurementService;
-import ru.nabokovsg.laboratoryNK.service.vms.VMSurveyService;
+import ru.nabokovsg.laboratoryNK.service.vms.EquipmentSurveyService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,7 +46,7 @@ public class CellTableServiceImpl implements CellTableService {
     private final ResultUltrasonicThicknessMeasurementService utMeasurementService;
     private final EquipmentRepairService equipmentRepairService;
     private final EquipmentElementService elementService;
-    private final VMSurveyService vmSurveyService;
+    private final EquipmentSurveyService vmSurveyService;
 
     @Override
     public void saveEquipmentInspection(DocumentTable table, TableTemplate tableTemplate, SurveyJournal surveyJournal) {
@@ -232,9 +232,9 @@ public class CellTableServiceImpl implements CellTableService {
         Map<String, Set<CompletedRepairElement>> repairElements = new HashMap<>();
         Map<String, String> visualInspections = vmSurveyService.getAll(surveyJournal.getId()
                            , surveyJournal.getEquipmentId()).stream()
-                                                            .collect(Collectors.toMap(VMSurvey::getElementName
-                                                                                    , VMSurvey::getInspection));
-        vmSurveyService.getAll(surveyJournal.getId(), surveyJournal.getEquipmentId()).stream().collect(Collectors.toMap(VMSurvey::getElementName, v -> v))
+                                                            .collect(Collectors.toMap(EquipmentSurvey::getElementName
+                                                                                    , EquipmentSurvey::getInspection));
+        vmSurveyService.getAll(surveyJournal.getId(), surveyJournal.getEquipmentId()).stream().collect(Collectors.toMap(EquipmentSurvey::getElementName, v -> v))
                 .forEach((k, v) -> {
                             defectsMeasurement.put(k, v.getDefects());
                             mergeLines.put(k, v.getDefects().size());

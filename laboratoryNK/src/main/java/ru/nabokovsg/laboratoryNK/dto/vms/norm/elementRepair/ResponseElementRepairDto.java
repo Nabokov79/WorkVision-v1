@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import ru.nabokovsg.laboratoryNK.dto.vms.norm.measuredParameter.MeasuredParameterDto;
+import ru.nabokovsg.laboratoryNK.dto.vms.norm.measuredParameter.ResponseMeasuredParameterDto;
 
 import java.util.List;
 
@@ -19,5 +20,5 @@ public class ResponseElementRepairDto {
     @Schema(description = "Наименование типа ремонта")
     private String repairName;
     @Schema(description = "Измеряемые параметры ремонта элемента")
-    private List<MeasuredParameterDto> measuredParameters;
+    private List<ResponseMeasuredParameterDto> measuredParameters;
 }

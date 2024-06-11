@@ -7,12 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.nabokovsg.laboratoryNK.dto.vms.measurement.visualInspection.VisualInspectionDto;
 import ru.nabokovsg.laboratoryNK.exceptions.NotFoundException;
-import ru.nabokovsg.laboratoryNK.mapper.vms.VMSurveyMapper;
+import ru.nabokovsg.laboratoryNK.mapper.vms.EquipmentSurveyMapper;
 import ru.nabokovsg.laboratoryNK.model.equipmentDiagnosed.EquipmentElement;
 import ru.nabokovsg.laboratoryNK.model.equipmentDiagnosed.PartElement;
-import ru.nabokovsg.laboratoryNK.model.vms.QVMSurvey;
-import ru.nabokovsg.laboratoryNK.model.vms.VMSurvey;
-import ru.nabokovsg.laboratoryNK.repository.vms.VMSurveyRepository;
+import ru.nabokovsg.laboratoryNK.model.vms.EquipmentSurvey;
+import ru.nabokovsg.laboratoryNK.model.vms.QEquipmentSurvey;
+import ru.nabokovsg.laboratoryNK.repository.vms.EquipmentSurveyRepository;
 import ru.nabokovsg.laboratoryNK.service.equipmentDiagnosed.EquipmentElementService;
 
 import java.util.Set;
@@ -21,16 +21,16 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class VMSurveyServiceImpl implements VMSurveyService {
+public class EquipmentSurveyServiceImpl implements EquipmentSurveyService {
 
-    private final VMSurveyRepository repository;
-    private final VMSurveyMapper mapper;
+    private final EquipmentSurveyRepository repository;
+    private final EquipmentSurveyMapper mapper;
     private final EntityManager em;
     private final EquipmentElementService equipmentElementService;
 
     @Override
-    public VMSurvey save(Long surveyJournalId, Long equipmentId, Long elementId, Long partElementId) {
-        VMSurvey vmSurvey = getByPredicate(surveyJournalId, equipmentId, elementId, partElementId);
+    public EquipmentSurvey save(Long surveyJournalId, Long equipmentId, Long elementId, Long partElementId) {
+        EquipmentSurvey vmSurvey = getByPredicate(surveyJournalId, equipmentId, elementId, partElementId);
         if (vmSurvey == null) {
             EquipmentElement element = equipmentElementService.getById(elementId);
             vmSurvey = mapper.mapToVMSurvey(surveyJournalId, equipmentId, element);
@@ -45,7 +45,7 @@ public class VMSurveyServiceImpl implements VMSurveyService {
     }
 
     @Override
-    public VMSurvey saveWithVisualInspection(VisualInspectionDto inspectionDto) {
+    public EquipmentSurvey saveWithVisualInspection(VisualInspectionDto inspectionDto) {
         return repository.save(mapper.mapWithVisualInspection(save(inspectionDto.getSurveyJournalId()
                                                                  , inspectionDto.getEquipmentId()
                                                                  , inspectionDto.getElementId()
@@ -54,8 +54,8 @@ public class VMSurveyServiceImpl implements VMSurveyService {
     }
 
     @Override
-    public Set<VMSurvey> getAll(Long surveyJournalId, Long equipmentId) {
-        Set<VMSurvey> vm = repository.findAllBySurveyJournalIdAndEquipmentId(surveyJournalId, equipmentId);
+    public Set<EquipmentSurvey> getAll(Long surveyJournalId, Long equipmentId) {
+        Set<EquipmentSurvey> vm = repository.findAllBySurveyJournalIdAndEquipmentId(surveyJournalId, equipmentId);
         if (vm.isEmpty()) {
             throw new NotFoundException(
                     String.format("VMSurvey by surveyJournalId=%s and equipmentId=%s not found", surveyJournalId
@@ -64,8 +64,8 @@ public class VMSurveyServiceImpl implements VMSurveyService {
         return vm;
     }
 
-    private VMSurvey getByPredicate(Long surveyJournalId, Long equipmentId, Long elementId, Long partElementId) {
-        QVMSurvey vm = QVMSurvey.vMSurvey;
+    private EquipmentSurvey getByPredicate(Long surveyJournalId, Long equipmentId, Long elementId, Long partElementId) {
+        QEquipmentSurvey vm = QEquipmentSurvey.equipmentSurvey;
         BooleanBuilder booleanBuilder = new BooleanBuilder();
         booleanBuilder.and(vm.surveyJournalId.eq(surveyJournalId));
         booleanBuilder.and(vm.equipmentId.eq(equipmentId));

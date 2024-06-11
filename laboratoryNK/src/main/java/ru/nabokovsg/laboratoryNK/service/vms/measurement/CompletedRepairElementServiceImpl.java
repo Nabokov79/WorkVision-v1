@@ -9,12 +9,12 @@ import ru.nabokovsg.laboratoryNK.dto.vms.measurement.completedRepairElement.Comp
 import ru.nabokovsg.laboratoryNK.dto.vms.measurement.completedRepairElement.ResponseCompletedRepairElementDto;
 import ru.nabokovsg.laboratoryNK.exceptions.NotFoundException;
 import ru.nabokovsg.laboratoryNK.mapper.vms.measurement.CompletedRepairElementMapper;
-import ru.nabokovsg.laboratoryNK.model.vms.QVMSurvey;
+import ru.nabokovsg.laboratoryNK.model.vms.QEquipmentSurvey;
 import ru.nabokovsg.laboratoryNK.model.vms.measurement.CompletedRepairElement;
 import ru.nabokovsg.laboratoryNK.model.vms.measurement.QCompletedRepairElement;
 import ru.nabokovsg.laboratoryNK.model.vms.norm.ElementRepair;
 import ru.nabokovsg.laboratoryNK.repository.vms.measurement.CompletedRepairElementRepository;
-import ru.nabokovsg.laboratoryNK.service.vms.VMSurveyService;
+import ru.nabokovsg.laboratoryNK.service.vms.EquipmentSurveyService;
 import ru.nabokovsg.laboratoryNK.service.vms.norm.ElementRepairService;
 
 import java.util.HashSet;
@@ -30,7 +30,7 @@ public class CompletedRepairElementServiceImpl implements CompletedRepairElement
     private final ElementRepairService repairService;
     private final ParameterMeasurementService parameterMeasurementService;
     private final EntityManager em;
-    private final VMSurveyService vmSurveyService;
+    private final EquipmentSurveyService vmSurveyService;
 
     @Override
     public ResponseCompletedRepairElementDto save(CompletedRepairElementDto repairDto) {
@@ -41,7 +41,7 @@ public class CompletedRepairElementServiceImpl implements CompletedRepairElement
                                         , vmSurveyService.save(repairDto.getSurveyJournalId(), repairDto.getEquipmentId()
                                                              , repairDto.getElementId(), repairDto.getPartElementId())));
         }
-        completedRepair.getParameterMeasurements().addAll(
+        completedRepair.setParameterMeasurements(
                 parameterMeasurementService.saveForCompletedRepair(elementRepair
                                                                 , completedRepair
                                                                 , repairDto.getParameterMeasurements()));
@@ -51,7 +51,7 @@ public class CompletedRepairElementServiceImpl implements CompletedRepairElement
     @Override
     public List<ResponseCompletedRepairElementDto> getAll(Long id) {
         QCompletedRepairElement repair = QCompletedRepairElement.completedRepairElement;
-        QVMSurvey vm = QVMSurvey.vMSurvey;
+        QEquipmentSurvey vm = QEquipmentSurvey.equipmentSurvey;
         BooleanBuilder booleanBuilder = new BooleanBuilder();
         booleanBuilder.and(vm.surveyJournalId.eq(id));
         return new JPAQueryFactory(em).from(repair)
@@ -66,7 +66,7 @@ public class CompletedRepairElementServiceImpl implements CompletedRepairElement
     @Override
     public Set<CompletedRepairElement> getAllByIds(Long surveyJournalId, Long equipmentId) {
         QCompletedRepairElement repair = QCompletedRepairElement.completedRepairElement;
-        QVMSurvey vm = QVMSurvey.vMSurvey;
+        QEquipmentSurvey vm = QEquipmentSurvey.equipmentSurvey;
         BooleanBuilder booleanBuilder = new BooleanBuilder();
         booleanBuilder.and(vm.surveyJournalId.eq(surveyJournalId));
         booleanBuilder.and(vm.equipmentId.eq(equipmentId));
@@ -92,7 +92,7 @@ public class CompletedRepairElementServiceImpl implements CompletedRepairElement
     }
 
     private CompletedRepairElement getByPredicate(CompletedRepairElementDto repairDto) {
-        QVMSurvey vm = QVMSurvey.vMSurvey;
+        QEquipmentSurvey vm = QEquipmentSurvey.equipmentSurvey;
         QCompletedRepairElement repair = QCompletedRepairElement.completedRepairElement;
         BooleanBuilder booleanBuilder = new BooleanBuilder();
         booleanBuilder.and(vm.surveyJournalId.eq(repairDto.getSurveyJournalId()));
@@ -104,7 +104,7 @@ public class CompletedRepairElementServiceImpl implements CompletedRepairElement
         }
         return new JPAQueryFactory(em).from(repair)
                 .select(repair)
-                .innerJoin(vm).on(repair.vmSurvey.id.eq(vm.id))
+                .innerJoin(vm).on(repair.equipmentSurvey.id.eq(vm.id))
                 .where(booleanBuilder)
                 .fetchOne();
     }

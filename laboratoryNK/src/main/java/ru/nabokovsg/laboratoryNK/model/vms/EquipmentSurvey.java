@@ -15,8 +15,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "vm_surveys")
-public class VMSurvey {
+@Table(name = "equipment_surveys")
+public class EquipmentSurvey {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,8 +35,8 @@ public class VMSurvey {
     private String partName;
     @Column(name = "inspection")
     private String inspection;
-    @OneToMany(mappedBy = "vmSurvey")
+    @OneToMany(mappedBy = "equipmentSurvey")
     private Set<DefectMeasurement> defects;
-    @OneToMany(mappedBy = "vmSurvey")
+    @OneToMany(mappedBy = "equipmentSurvey")
     private Set<CompletedRepairElement> repairs;
 }

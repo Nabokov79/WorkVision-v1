@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.nabokovsg.laboratoryNK.model.vms.VMSurvey;
+import ru.nabokovsg.laboratoryNK.model.vms.EquipmentSurvey;
 
 import java.util.Set;
 
@@ -31,6 +31,6 @@ public class DefectMeasurement {
     @OneToMany(mappedBy = "defectMeasurement")
     private Set<CalculationParameterMeasurement> parameterMeasurements;
     @ManyToOne
-    @JoinColumn(name = "vm_id",  nullable = false)
-    private VMSurvey vmSurvey;
+    @JoinColumn(name = "equipment_survey_id",  nullable = false)
+    private EquipmentSurvey equipmentSurvey;
 }
